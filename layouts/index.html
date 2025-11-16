@@ -363,8 +363,17 @@
               </label>
               <label>
                 Primary modality *
-                <span class="helper">One line summary (e.g., Text + Image)</span>
-                <input type="text" name="modality" required />
+                <span class="helper">Hold Cmd/Ctrl to select multiple</span>
+                <select name="modality" id="modality" multiple required>
+                  <option value="Text">Text</option>
+                  <option value="Image">Image</option>
+                  <option value="Video">Video</option>
+                  <option value="Audio">Audio</option>
+                  <option value="Table">Table</option>
+                  <option value="Thermal">Thermal</option>
+                  <option value="IMU">IMU</option>
+                  <option value="Other">Other</option>
+                </select>
               </label>
               <label>
                 Domain *
@@ -515,13 +524,58 @@
         search: document.getElementById("filter-search"),
       };
       const filters = { type: "", domain: "", tag: "", search: "" };
+      const MODALITY_OPTIONS = ["Text", "Image", "Video", "Audio", "Table", "Thermal", "IMU", "Other"];
+
+      const normalizeModalities = (value) => {
+        const rawList = Array.isArray(value)
+          ? value
+          : typeof value === "string"
+          ? value.split(/[+,\/]+/)
+          : [];
+
+        const normalized = rawList
+          .map((token) => token.trim())
+          .filter(Boolean)
+          .map((token) => {
+            const exactMatch = MODALITY_OPTIONS.find(
+              (option) => option.toLowerCase() === token.toLowerCase()
+            );
+            if (exactMatch) return exactMatch;
+            if (/table/i.test(token)) return "Table";
+            if (/thermal/i.test(token)) return "Thermal";
+            if (/imu/i.test(token)) return "IMU";
+            if (/video/i.test(token)) return "Video";
+            if (/audio|speech/i.test(token)) return "Audio";
+            if (/image|vision|visual/i.test(token)) return "Image";
+            if (/text|language/i.test(token)) return "Text";
+            return "Other";
+          });
+
+        const unique = [...new Set(normalized)];
+        return unique.sort(
+          (a, b) => MODALITY_OPTIONS.indexOf(a) - MODALITY_OPTIONS.indexOf(b)
+        );
+      };
+
+      const formatModalities = (modalities = []) =>
+        modalities.length ? modalities.join(" + ") : "—";
+
+      const getSelectValues = (select) =>
+        Array.from(select.selectedOptions || []).map((option) => option.value);
+
+      const setSelectValues = (select, values = []) => {
+        const normalized = normalizeModalities(values);
+        Array.from(select.options).forEach((option) => {
+          option.selected = normalized.includes(option.value);
+        });
+      };
 
       const seedEntries = [
         {
           id: "seed-1",
           type: "Evaluation Set",
           task: "TextbookQA",
-          modality: "Text + Image",
+          modalities: ["Text", "Image"],
           domain: "Education",
           dataPoints: 15154,
           taskCategory: "Multimodal Machine Comprehension",
@@ -544,7 +598,7 @@
           id: "seed-2",
           type: "Evaluation Set",
           task: "DocVQA",
-          modality: "Text + Image",
+          modalities: ["Text", "Image"],
           domain: "Documents",
           dataPoints: 50000,
           taskCategory: "Visual QA",
@@ -566,7 +620,7 @@
           id: "seed-3",
           type: "Evaluation Set",
           task: "SlideVQA",
-          modality: "Text + Image",
+          modalities: ["Text", "Image"],
           domain: "Presentation Slides",
           dataPoints: 14484,
           taskCategory: "Visual QA",
@@ -589,7 +643,7 @@
           id: "seed-4",
           type: "Evaluation Set",
           task: "IconQA",
-          modality: "Text + Image",
+          modalities: ["Text", "Image"],
           domain: "Daily Icons",
           dataPoints: 31578,
           taskCategory: "Icon Reasoning",
@@ -612,7 +666,7 @@
           id: "seed-5",
           type: "Evaluation Set",
           task: "AI2D-RST",
-          modality: "Text + Diagram",
+          modalities: ["Text", "Other"],
           domain: "Science Diagrams",
           dataPoints: 1000,
           taskCategory: "Educational Diagram",
@@ -635,7 +689,7 @@
           id: "seed-6",
           type: "Evaluation Set",
           task: "Dyn-VQA",
-          modality: "Text + Image",
+          modalities: ["Text", "Image"],
           domain: "Mixed Domain",
           dataPoints: 1452,
           taskCategory: "Multimodal RAG / VQA",
@@ -660,7 +714,7 @@
           id: "seed-7",
           type: "Training Set",
           task: "PDF-MVQA",
-          modality: "Text + Image",
+          modalities: ["Text", "Image"],
           domain:
             "Research journal articles (scientific / technical papers)",
           dataPoints: 262928,
@@ -685,7 +739,7 @@
           id: "seed-8",
           type: "Training Set",
           task: "SPIQA",
-          modality: "Image + Text",
+          modalities: ["Image", "Text"],
           domain: "Scientific research papers (computer science)",
           dataPoints: 270000,
           taskCategory: "Scientific Paper Image QA / CoT",
@@ -708,7 +762,7 @@
           id: "seed-9",
           type: "Evaluation Set",
           task: "RecipeQA",
-          modality: "Text + Image",
+          modalities: ["Text", "Image"],
           domain: "Cooking / procedural knowledge",
           dataPoints: 36786,
           taskCategory: "Multimodal Procedural Reasoning",
@@ -733,7 +787,7 @@
           id: "seed-10",
           type: "Evaluation Set",
           task: "OK-VQA",
-          modality: "Text + Image",
+          modalities: ["Text", "Image"],
           domain: "General world knowledge",
           dataPoints: 14055,
           taskCategory: "Knowledge-Based VQA",
@@ -763,11 +817,11 @@
       const deriveAutoTags = (entry) => {
         const tags = new Set();
         const push = (value) => {
-          if (value && value.trim()) {
-            tags.add(value.trim());
+          if (value && String(value).trim()) {
+            tags.add(String(value).trim());
           }
         };
-        push(entry.modality);
+        (entry.modalities || []).forEach(push);
         push(entry.domain);
         if (entry.queryMod || entry.targetMod || entry.numQuery || entry.numCandidates) {
           tags.add("RAG");
@@ -796,6 +850,7 @@
 
       let datasetEntries = (getSavedEntries() ?? seedEntries).map((entry) => ({
         ...entry,
+        modalities: normalizeModalities(entry.modalities ?? entry.modality),
         customTags: Array.isArray(entry.customTags)
           ? entry.customTags
           : parseTags(entry.customTags || ""),
@@ -950,7 +1005,7 @@
             const haystack = [
               entry.type,
               entry.task,
-              entry.modality,
+              formatModalities(entry.modalities),
               entry.domain,
               entry.taskCategory,
               entry.description,
@@ -1000,7 +1055,7 @@
 
             row.appendChild(createCell(entry.type));
             row.appendChild(createCell(entry.task));
-            row.appendChild(createCell(entry.modality));
+            row.appendChild(createCell(formatModalities(entry.modalities)));
             row.appendChild(createCell(entry.domain));
             row.appendChild(createCell(formatNumber(entry.dataPoints)));
             row.appendChild(createCell(entry.taskCategory));
@@ -1105,7 +1160,7 @@
         if (!entry) return;
         form.type.value = entry.type;
         form.task.value = entry.task;
-        form.modality.value = entry.modality || "";
+        setSelectValues(form.modality, entry.modalities);
         form.domain.value = entry.domain;
         form.dataPoints.value = entry.dataPoints ?? "";
         form.taskCategory.value = entry.taskCategory;
@@ -1165,7 +1220,7 @@
           id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()),
           type: formData.get("type"),
           task: formData.get("task"),
-          modality: formData.get("modality"),
+          modalities: normalizeModalities(getSelectValues(form.modality)),
           domain: formData.get("domain"),
           dataPoints: formData.get("dataPoints") || "",
           taskCategory: formData.get("taskCategory"),
