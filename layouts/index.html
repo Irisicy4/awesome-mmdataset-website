@@ -237,6 +237,8 @@
         border-bottom: 1px solid var(--border);
         vertical-align: top;
         width: 140px;
+        word-break: break-word;
+        overflow-wrap: anywhere;
       }
 
       th.col-description,
@@ -1127,9 +1129,16 @@
       const editTags = (id) => {
         const entry = datasetEntries.find((item) => item.id === id);
         if (!entry) return;
-        const current = (entry.customTags || []).join(", ");
-        const next = window.prompt("Update tags (comma-separated):", current);
+
+        const autoTags = deriveAutoTags(entry);
+        const manualTags = entry.customTags || [];
+        const message = [
+          "Update manual tags (comma-separated).",
+          autoTags.length ? `Auto tags: ${autoTags.join(", ")}` : "No auto tags detected.",
+        ].join("\n");
+        const next = window.prompt(message, manualTags.join(", "));
         if (next === null) return;
+
         entry.customTags = parseTags(next);
         persistEntries();
         renderTable();
