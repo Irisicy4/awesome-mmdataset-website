@@ -1,0 +1,201 @@
+/* Light theme inspired by Kent C. Dodds' design */
+
+:root {
+    /* Kent C. Dodds inspired light color palette */
+    --color-white: #ffffff;
+    --color-black: #1a1a1a;
+    --color-gray-50: #f9fafb;
+    --color-gray-100: #f3f4f6;
+    --color-gray-200: #e5e7eb;
+    --color-gray-300: #d1d5db;
+    --color-gray-400: #9ca3af;
+    --color-gray-500: #6b7280;
+    --color-gray-600: #4b5563;
+    --color-gray-700: #374151;
+    --color-gray-800: #1f2937;
+    --color-gray-900: #111827;
+    
+    /* Accent colors */
+    --color-blue-500: #3b82f6;
+    --color-blue-600: #2563eb;
+    --color-blue-700: #1d4ed8;
+    
+    /* Success/accent */
+    --color-green-500: #10b981;
+    --color-green-600: #059669;
+}
+
+/* Force light mode */
+.toggle {
+    display: none !important;
+}
+
+[data-scheme="light"] {
+    --card-background: var(--color-white);
+    --card-background-selected: var(--color-gray-50);
+    
+    --card-text-color-main: var(--color-gray-900);
+    --card-text-color-secondary: var(--color-gray-600);
+    --card-text-color-tertiary: var(--color-gray-500);
+    --card-separator-color: var(--color-gray-200);
+    
+    --card-border-radius: 12px;
+    
+    --tag-border-radius: 6px;
+    
+    --section-separation: 40px;
+    
+    --scrollbar-thumb: var(--color-gray-300);
+    --scrollbar-track: var(--color-gray-100);
+    
+    --body-background: var(--color-gray-50);
+    --body-text-color: var(--color-gray-900);
+    
+    --accent-color: var(--color-blue-600);
+    --accent-color-darker: var(--color-blue-700);
+    --accent-color-text: var(--color-white);
+    
+    --link-color: var(--color-blue-600);
+    --link-color-hover: var(--color-blue-700);
+    
+    --pre-background: var(--color-gray-100);
+    --pre-text-color: var(--color-gray-800);
+    
+    --code-background: var(--color-gray-100);
+    --code-text-color: var(--color-gray-800);
+    
+    --table-border-color: var(--color-gray-200);
+    --tr-even-background-color: var(--color-gray-50);
+}
+
+/* Custom styling for light theme */
+body {
+    background-color: var(--body-background);
+    color: var(--body-text-color);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    line-height: 1.6;
+}
+
+/* Header styling */
+.main-container .sidebar {
+    background-color: var(--card-background);
+    border-right: 1px solid var(--card-separator-color);
+}
+
+.sidebar .site-avatar .site-logo {
+    border-radius: 50%;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+/* Card styling */
+.article-list--compact article {
+    background-color: var(--card-background);
+    border: 1px solid var(--card-separator-color);
+    border-radius: var(--card-border-radius);
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+    transition: all 0.2s ease;
+}
+
+.article-list--compact article:hover {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    transform: translateY(-1px);
+}
+
+/* Typography */
+h1, h2, h3, h4, h5, h6 {
+    color: var(--card-text-color-main);
+    font-weight: 600;
+}
+
+/* Links */
+a {
+    color: var(--link-color);
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+a:hover {
+    color: var(--link-color-hover);
+}
+
+/* Social links styling */
+.social-menu .social-menu-link {
+    background-color: var(--accent-color);
+    border-radius: 8px;
+    padding: 8px 12px;
+    color: var(--accent-color-text) !important;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.social-menu .social-menu-link:hover {
+    background-color: var(--accent-color-darker);
+    transform: translateY(-1px);
+}
+
+/* Custom spacing for better visual hierarchy */
+.main-container.extended .sidebar {
+    width: 300px;
+}
+
+.article-page .main-article {
+    max-width: 750px;
+    margin: 0 auto;
+    padding: 40px 20px;
+}
+
+/* Enhanced readability */
+.article-content p {
+    margin-bottom: 1.5em;
+}
+
+.article-content h2 {
+    margin-top: 2em;
+    margin-bottom: 1em;
+    padding-bottom: 0.5em;
+    border-bottom: 1px solid var(--card-separator-color);
+}
+
+/* Publication list styling */
+.article-content strong {
+    color: var(--card-text-color-main);
+    font-weight: 600;
+}
+
+/* Code blocks */
+pre {
+    background-color: var(--pre-background) !important;
+    border: 1px solid var(--card-separator-color);
+    border-radius: 8px;
+    padding: 20px;
+}
+
+code {
+    background-color: var(--code-background);
+    color: var(--code-text-color);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.9em;
+}
+
+/* Tables */
+table {
+    border-collapse: collapse;
+    border: 1px solid var(--table-border-color);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+th, td {
+    border: 1px solid var(--table-border-color);
+    padding: 12px 16px;
+}
+
+th {
+    background-color: var(--card-background-selected);
+    font-weight: 600;
+}
+
+tr:nth-child(even) {
+    background-color: var(--tr-even-background-color);
+}

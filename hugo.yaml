@@ -1,0 +1,112 @@
+baseurl: https://irisicy4.github.io/
+languageCode: en-us
+theme: hugo-theme-stack
+title: Bingyang (Icy) Wang
+copyright: Bingyang Wang
+
+# Theme i18n support
+DefaultContentLanguage: en
+
+# Set hasCJKLanguage to true if DefaultContentLanguage is in [zh-cn ja ko]
+hasCJKLanguage: false
+
+languages:
+    en:
+        languageName: English
+        title: Bingyang (Icy) Wang
+        weight: 1
+        params:
+            sidebar:
+                subtitle: Quantitative Analyst & AI Researcher
+
+services:
+    googleAnalytics:
+        id: ""
+
+pagination:
+    pagerSize: 10
+
+permalinks:
+    post: /p/:slug/
+    page: /:slug/
+
+params:
+    mainSections:
+        - post
+    featuredImageField: image
+    rssFullContent: true
+    
+    favicon: /img/favicon.ico
+    
+    sidebar:
+        emoji: 👋
+        subtitle: Quantitative Analyst at RBC Capital Markets & MS CS at Georgia Tech
+        avatar:
+            enabled: true
+            local: true
+            src: img/avatar.png
+    
+    article:
+        math: false
+        toc: true
+        readingTime: true
+        license:
+            enabled: false
+    
+    comments:
+        enabled: false
+    
+    widgets:
+        homepage: []
+        page: []
+    
+    opengraph:
+        enabled: true
+        local_fonts: false
+    
+    defaultImage:
+        opengraph:
+            enabled: false
+            local: false
+            src:
+    
+    colorScheme:
+        toggle: true
+        default: light
+
+    imageProcessing:
+        cover:
+            enabled: true
+        content:
+            enabled: true
+
+markup:
+    goldmark:
+        renderer:
+            unsafe: true
+    tableOfContents:
+        endLevel: 4
+        ordered: true
+        startLevel: 2
+    highlight:
+        lineNos: true
+        style: github
+
+menu:
+    main: []
+    social:
+        - identifier: linkedin
+          name: LinkedIn
+          url: http://linkedin.com/in/bingyang-icy-wang
+          params:
+              icon: brand-linkedin
+        - identifier: github
+          name: GitHub
+          url: https://github.com/Irisicy4
+          params:
+              icon: brand-github
+        - identifier: google-scholar
+          name: Google Scholar
+          url: https://scholar.google.com/citations?user=UA270iMAAAAJ&hl=en&authuser=1
+          params:
+              icon: link

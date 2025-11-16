@@ -1,0 +1,1186 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Multimodal Dataset Registry</title>
+    <style>
+      :root {
+        --bg-start: #fdf4ff;
+        --bg-end: #eef6ff;
+        --card: #ffffff;
+        --card-accent: #f6f8ff;
+        --ink: #1f2a37;
+        --ink-muted: #6b7280;
+        --border: #e3e8f4;
+        --accent: #7c3aed;
+        --accent-2: #0ea5e9;
+        --accent-soft: rgba(124, 58, 237, 0.08);
+        --danger: #db2777;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: "Inter", "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+        color: var(--ink);
+        background: linear-gradient(140deg, var(--bg-start), var(--bg-end));
+        padding: clamp(1.5rem, 4vw, 2.75rem);
+      }
+
+      main {
+        max-width: 1200px;
+        margin: 0 auto;
+        background: var(--card);
+        border-radius: 28px;
+        padding: clamp(1.5rem, 4vw, 2.5rem);
+        border: 1px solid var(--border);
+        box-shadow: 0 25px 60px rgba(100, 116, 139, 0.12);
+      }
+
+      h1 {
+        margin: 0 0 1.5rem;
+        font-size: clamp(2.1rem, 4vw, 3rem);
+      }
+
+      .card {
+        background: var(--card-accent);
+        border-radius: 20px;
+        border: 1px solid var(--border);
+        padding: clamp(1.25rem, 3vw, 1.75rem);
+      }
+
+      form {
+        display: flex;
+        flex-direction: column;
+        gap: 1.2rem;
+      }
+
+      fieldset {
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 1rem 1.2rem 1.2rem;
+        margin: 0;
+        background: #fff;
+      }
+
+      fieldset legend {
+        padding: 0 0.4rem;
+        text-transform: uppercase;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        color: var(--accent);
+      }
+
+      .field-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 1rem;
+      }
+
+      label {
+        display: flex;
+        flex-direction: column;
+        gap: 0.35rem;
+        font-weight: 600;
+        font-size: 0.9rem;
+      }
+
+      label span.helper {
+        font-size: 0.78rem;
+        font-weight: 500;
+        color: var(--ink-muted);
+      }
+
+      input,
+      select,
+      textarea {
+        border-radius: 12px;
+        border: 1px solid #d4dbe8;
+        padding: 0.65rem 0.85rem;
+        font-family: inherit;
+        font-size: 1rem;
+        background: #fff;
+        color: var(--ink);
+      }
+
+      textarea {
+        min-height: 80px;
+        resize: vertical;
+      }
+
+      summary {
+        cursor: pointer;
+        font-weight: 600;
+        color: var(--accent);
+        margin-bottom: 0.8rem;
+      }
+
+      details.retrieval {
+        border: 1px dashed var(--border);
+        border-radius: 16px;
+        padding: 0.9rem 1rem 0.4rem;
+        background: var(--card-accent);
+      }
+
+      .actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+      }
+
+      button {
+        border: none;
+        border-radius: 999px;
+        padding: 0.65rem 1.4rem;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        background: linear-gradient(135deg, var(--accent), var(--accent-2));
+        color: #fff;
+        box-shadow: 0 15px 30px rgba(14, 165, 233, 0.25);
+        transition: transform 120ms ease, box-shadow 120ms ease;
+      }
+
+      button.secondary {
+        background: #fff;
+        color: var(--accent);
+        border: 1px solid rgba(124, 58, 237, 0.4);
+        box-shadow: none;
+      }
+
+      button.danger {
+        background: var(--danger);
+        box-shadow: none;
+      }
+
+      button:hover {
+        transform: translateY(-1px);
+      }
+
+      button.secondary:hover,
+      button.danger:hover {
+        transform: none;
+      }
+
+      .table-section {
+        margin-top: 2.2rem;
+      }
+
+      .table-filters {
+        margin-top: 1rem;
+        padding: 0.8rem 1rem;
+        border-radius: 16px;
+        border: 1px solid var(--border);
+        background: var(--card-accent);
+      }
+
+      .filters-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 0.8rem;
+        align-items: end;
+      }
+
+      .filters-grid label {
+        display: flex;
+        flex-direction: column;
+        gap: 0.35rem;
+        font-size: 0.85rem;
+        font-weight: 600;
+      }
+
+      .filters-grid select,
+      .filters-grid input {
+        border-radius: 999px;
+        border: 1px solid #d4dbe8;
+        padding: 0.5rem 0.9rem;
+        font-size: 0.95rem;
+        background: #fff;
+      }
+
+      .filters-grid label.search {
+        grid-column: span 2;
+      }
+
+      .table-wrapper {
+        margin-top: 0.9rem;
+        border-radius: 24px;
+        border: 1px solid var(--border);
+        overflow-x: auto;
+        background: #fff;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        table-layout: fixed;
+        min-width: 1050px;
+      }
+
+      thead {
+        background: linear-gradient(90deg, rgba(124, 58, 237, 0.12), rgba(14, 165, 233, 0.12));
+        text-transform: uppercase;
+        font-size: 0.78rem;
+        letter-spacing: 0.08em;
+        color: var(--ink-muted);
+      }
+
+      th,
+      td {
+        padding: 0.85rem 0.8rem;
+        border-bottom: 1px solid var(--border);
+        vertical-align: top;
+        width: 140px;
+      }
+
+      th.col-description,
+      td.col-description {
+        width: 320px;
+      }
+
+      th.col-tags,
+      td.col-tags {
+        width: 200px;
+      }
+
+      th.col-logistics,
+      td.col-logistics {
+        width: 220px;
+      }
+
+      tbody tr:last-child td {
+        border-bottom: none;
+      }
+
+      tbody tr:hover td {
+        background: var(--accent-soft);
+      }
+
+      .pill {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.18rem 0.7rem;
+        border-radius: 999px;
+        font-size: 0.78rem;
+        font-weight: 600;
+        background: rgba(79, 70, 229, 0.15);
+        color: var(--ink);
+        margin-right: 0.25rem;
+        margin-bottom: 0.2rem;
+      }
+
+      .link-stack {
+        display: flex;
+        flex-direction: column;
+        gap: 0.35rem;
+      }
+
+      .tag-stack {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.35rem;
+        margin-bottom: 0.5rem;
+      }
+
+      .tag-edit {
+        border: 1px solid rgba(124, 58, 237, 0.3);
+        background: transparent;
+        color: var(--accent);
+        border-radius: 999px;
+        padding: 0.3rem 0.8rem;
+        font-size: 0.78rem;
+        font-weight: 600;
+      }
+
+      a {
+        color: var(--accent);
+        text-decoration: none;
+      }
+
+      a:hover {
+        text-decoration: underline;
+      }
+
+      .table-actions {
+        display: flex;
+        gap: 0.4rem;
+        flex-wrap: wrap;
+      }
+
+      .table-actions button {
+        padding: 0.4rem 0.9rem;
+        font-size: 0.85rem;
+      }
+
+      .muted {
+        color: var(--ink-muted);
+        font-size: 0.9rem;
+      }
+
+      @media (max-width: 720px) {
+        body {
+          padding: 1rem;
+        }
+
+        table {
+          min-width: 900px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Multimodal Dataset Registry</h1>
+
+      <section class="card">
+        <form id="dataset-form">
+          <fieldset>
+            <legend>Dataset overview</legend>
+            <div class="field-grid">
+              <label>
+                Type *
+                <span class="helper">Select dataset role</span>
+                <select name="type" required>
+                  <option value=""></option>
+                  <option>Evaluation Set</option>
+                  <option>Training Set</option>
+                  <option>Benchmark</option>
+                  <option>Other</option>
+                </select>
+              </label>
+              <label>
+                Task *
+                <span class="helper">Dataset / benchmark name</span>
+                <input type="text" name="task" required />
+              </label>
+              <label>
+                Primary modality *
+                <span class="helper">One line summary (e.g., Text + Image)</span>
+                <input type="text" name="modality" required />
+              </label>
+              <label>
+                Domain *
+                <span class="helper">Primary context</span>
+                <input type="text" name="domain" required />
+              </label>
+              <label>
+                Data points
+                <span class="helper">Total samples</span>
+                <input type="number" name="dataPoints" min="0" />
+              </label>
+              <label>
+                Task category *
+                <span class="helper">e.g., Visual QA</span>
+                <input type="text" name="taskCategory" required />
+              </label>
+              <label>
+                Tags
+                <span class="helper">Comma-separated optional labels</span>
+                <input type="text" name="tags" placeholder="mRAG, cooking" />
+              </label>
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend>Download &amp; Logistics</legend>
+            <div class="field-grid">
+              <label>
+                Data link(s) *
+                <span class="helper">Add URLs or repo paths, separate multiple with commas.</span>
+                <textarea name="dataLink" required></textarea>
+              </label>
+              <label>
+                Load / download instructions
+                <span class="helper">Script fragments or helper notes.</span>
+                <textarea name="loadData"></textarea>
+              </label>
+              <label>
+                Data size (GB)
+                <span class="helper">Approximate download footprint.</span>
+                <input type="number" name="dataSize" step="0.1" min="0" />
+              </label>
+            </div>
+          </fieldset>
+
+          <label>
+            Description *
+            <textarea name="description" required></textarea>
+          </label>
+
+          <label>
+            Specialty / nuance
+            <textarea name="specialty"></textarea>
+          </label>
+
+          <label>
+            Paper link
+            <input type="text" name="paperLink" />
+          </label>
+
+          <details class="retrieval" id="retrieval-details">
+            <summary>Retrieval-specific metadata (optional)</summary>
+            <div class="field-grid">
+              <label>
+                Query modality
+                <input type="text" name="queryMod" />
+              </label>
+              <label>
+                Target modality
+                <input type="text" name="targetMod" />
+              </label>
+              <label>
+                Number of queries
+                <input type="number" name="numQuery" min="0" />
+              </label>
+              <label>
+                Number of candidates
+                <input type="number" name="numCandidates" min="0" />
+              </label>
+            </div>
+          </details>
+
+          <div class="actions">
+            <button type="reset" class="secondary">Reset</button>
+            <button type="submit">Add dataset entry</button>
+          </div>
+        </form>
+      </section>
+
+      <section class="table-section">
+        <div class="table-filters">
+          <div class="filters-grid">
+            <label>
+              Type filter
+              <select id="filter-type" data-placeholder="All types" data-filter-key="type"></select>
+            </label>
+            <label>
+              Domain filter
+              <select id="filter-domain" data-placeholder="All domains" data-filter-key="domain"></select>
+            </label>
+            <label>
+              Tag filter
+              <select id="filter-tag" data-placeholder="All tags" data-filter-key="tag"></select>
+            </label>
+            <label class="search">
+              Search entries
+              <input type="search" id="filter-search" placeholder="Search dataset fields..." />
+            </label>
+          </div>
+        </div>
+        <div class="table-wrapper">
+          <table id="dataset-table">
+            <thead>
+              <tr>
+                <th class="col-tags">Tags</th>
+                <th>Type</th>
+                <th>Task</th>
+                <th>Modality</th>
+                <th>Domain</th>
+                <th>Data points</th>
+                <th>Task category</th>
+                <th class="col-description">Description</th>
+                <th>Specialty</th>
+                <th>Paper</th>
+                <th>Data link</th>
+                <th class="col-logistics">Load / Logistics</th>
+                <th>Size</th>
+                <th>Retrieval</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <script>
+      const STORAGE_KEY = "mmDatasetEntries-v3";
+
+      const form = document.getElementById("dataset-form");
+      const tableBody = document.querySelector("#dataset-table tbody");
+      const retrievalDetails = document.getElementById("retrieval-details");
+      const filterControls = {
+        type: document.getElementById("filter-type"),
+        domain: document.getElementById("filter-domain"),
+        tag: document.getElementById("filter-tag"),
+        search: document.getElementById("filter-search"),
+      };
+      const filters = { type: "", domain: "", tag: "", search: "" };
+
+      const seedEntries = [
+        {
+          id: "seed-1",
+          type: "Evaluation Set",
+          task: "TextbookQA",
+          modality: "Text + Image",
+          domain: "Education",
+          dataPoints: 15154,
+          taskCategory: "Multimodal Machine Comprehension",
+          description:
+            "Multiple-choice questions sourced from middle school textbooks that demand joint text + illustration reasoning.",
+          specialty:
+            "Strong focus on grade-school science topics; visuals frequently hold the missing clue.",
+          paperLink: "",
+          dataLink: "https://prior.allenai.org/projects/tqa",
+          loadData:
+            "Complete train/val/test zip (1.6 GB): https://s3.amazonaws.com/ai2-vision-textbook-dataset/dataset_releases/tqa/tqa_train_val_test.zip",
+          dataSize: 1.6,
+          queryMod: "T+I",
+          targetMod: "T",
+          numQuery: 15154,
+          numCandidates: "",
+          customTags: [],
+        },
+        {
+          id: "seed-2",
+          type: "Evaluation Set",
+          task: "DocVQA",
+          modality: "Text + Image",
+          domain: "Documents",
+          dataPoints: 50000,
+          taskCategory: "Visual QA",
+          description:
+            "Document understanding benchmark with OCR-heavy pages spanning invoices, forms, and archival scans.",
+          specialty:
+            "Mix of noisy scans and contemporary layouts; leaderboard hosted through ICDAR/RRC.",
+          paperLink: "",
+          dataLink: "https://www.docvqa.org/datasets",
+          loadData: "RRC portal download: https://www.docvqa.org/datasets",
+          dataSize: "",
+          queryMod: "T+I",
+          targetMod: "T",
+          numQuery: 50000,
+          numCandidates: 12767,
+          customTags: [],
+        },
+        {
+          id: "seed-3",
+          type: "Evaluation Set",
+          task: "SlideVQA",
+          modality: "Text + Image",
+          domain: "Presentation Slides",
+          dataPoints: 14484,
+          taskCategory: "Visual QA",
+          description:
+            "Question answering benchmark built on corporate + academic slides with text-over-visual layouts.",
+          specialty:
+            "Covers diagram-dense decks; emphasizes entity extraction across slide transitions.",
+          paperLink: "",
+          dataLink: "https://github.com/nttmdlab-nlp/SlideVQA",
+          loadData:
+            "HF snapshot helper: python - <<'PY'\nfrom huggingface_hub import snapshot_download\nsnapshot_download('NTT-hil-insight/SlideVQA', repo_type='dataset', local_dir='SlideVQA')\nPY",
+          dataSize: "",
+          queryMod: "T+I",
+          targetMod: "T",
+          numQuery: 14484,
+          numCandidates: "",
+          customTags: [],
+        },
+        {
+          id: "seed-4",
+          type: "Evaluation Set",
+          task: "IconQA",
+          modality: "Text + Image",
+          domain: "Daily Icons",
+          dataPoints: 31578,
+          taskCategory: "Icon Reasoning",
+          description:
+            "Icon-based question answering dataset centered on math and logic problems drawn as infographics.",
+          specialty:
+            "Requires reasoning over stylized pictograms rather than natural images; multiple skills per sample.",
+          paperLink: "",
+          dataLink: "https://iconqa.github.io/",
+          loadData:
+            "S3 direct: https://iconqa2021.s3.us-west-1.amazonaws.com (download iconqa_data.zip) • or run repo helper: bash tools/download_data_and_models.sh",
+          dataSize: "",
+          queryMod: "T+I",
+          targetMod: "T",
+          numQuery: 31578,
+          numCandidates: 57672,
+          customTags: [],
+        },
+        {
+          id: "seed-5",
+          type: "Evaluation Set",
+          task: "AI2D-RST",
+          modality: "Text + Diagram",
+          domain: "Science Diagrams",
+          dataPoints: 1000,
+          taskCategory: "Educational Diagram",
+          description:
+            "Structural multimodal diagram understanding dataset with rhetorical and perceptual annotations.",
+          specialty:
+            "Semiotically grounded corpus designed for retrieval-enhanced reasoning over textbook diagrams.",
+          paperLink: "",
+          dataLink: "https://github.com/thiippal/AI2D-RST",
+          loadData:
+            "AI2D-RST v1.1 zip: https://korp.csc.fi/download/AI2D-RST/v1.1/ai2d-rst-v1-1.zip • Original AI2D diagrams: https://ai2-website.s3.amazonaws.com/data/ai2d-all.zip",
+          dataSize: "",
+          queryMod: "T+I",
+          targetMod: "T",
+          numQuery: "",
+          numCandidates: 1000,
+          customTags: [],
+        },
+        {
+          id: "seed-6",
+          type: "Evaluation Set",
+          task: "Dyn-VQA",
+          modality: "Text + Image",
+          domain: "Mixed Domain",
+          dataPoints: 1452,
+          taskCategory: "Multimodal RAG / VQA",
+          description:
+            "Dynamic multimodal VQA requiring adaptive, multi-hop external knowledge retrieval.",
+          specialty:
+            "Built for mRAG pipelines; emphasizes planning adaptive retrieval (OmniSearch) with evolving answers.",
+          paperLink:
+            "Benchmarking Multimodal Retrieval Augmented Generation with Dynamic VQA Dataset and Self-adaptive Planning Agent",
+          dataLink: "",
+          loadData:
+            "HF snapshot helper: python - <<'PY'\nfrom huggingface_hub import snapshot_download\nsnapshot_download('zhzhen23/DynVQA', repo_type='dataset', local_dir='DynVQA')\nPY",
+          dataSize: "",
+          queryMod:
+            "Text + Image (complex open-ended questions needing visual + external knowledge)",
+          targetMod: "T",
+          numQuery: 1452,
+          numCandidates: "",
+          customTags: [],
+        },
+        {
+          id: "seed-7",
+          type: "Training Set",
+          task: "PDF-MVQA",
+          modality: "Text + Image",
+          domain:
+            "Research journal articles (scientific / technical papers)",
+          dataPoints: 262928,
+          taskCategory: "Multimodal Document IR / VQA",
+          description:
+            "Large-scale PDF-based QA dataset requiring retrieval of paragraphs, figures, and tables.",
+          specialty:
+            "Layout-aware supervision with explicit evidence linking for retrieval-augmented generation.",
+          paperLink: "https://arxiv.org/abs/2404.12720",
+          dataLink:
+            "Structured training PKL: https://drive.google.com/file/d/1AtZaq3M_tCVoTgyp7xxSvXwO0-cs_HFM/view\nQA train CSV: https://drive.google.com/file/d/1-BVyeBf0E_9H9JZVupEgIwoGm_B-8YBR/view\nQA val CSV: https://drive.google.com/file/d/1tluQaTENTwWxy6m2Ut9NAWIW7Yn70Q1_/view\nImages folder: https://drive.google.com/drive/folders/120dvYlID_D8cZ5-lOYHyu1WuHRKEMac6",
+          loadData: "Direct Google Drive downloads (see links).",
+          dataSize: "",
+          queryMod:
+            "Text + Image (PDF pages containing dense text + figures/tables)",
+          targetMod: "Text (answer generation / evidence retrieval)",
+          numQuery: 262928,
+          numCandidates: "",
+          customTags: [],
+        },
+        {
+          id: "seed-8",
+          type: "Training Set",
+          task: "SPIQA",
+          modality: "Image + Text",
+          domain: "Scientific research papers (computer science)",
+          dataPoints: 270000,
+          taskCategory: "Scientific Paper Image QA / CoT",
+          description:
+            "Questions grounded jointly in figures/tables and adjacent text, with CoT evaluation labels.",
+          specialty:
+            "Targets interleaved reasoning over chart segments and textual context from CS papers.",
+          paperLink: "https://arxiv.org/abs/2407.09413",
+          dataLink: "",
+          loadData:
+            "HF snapshot helper: python - <<'PY'\nfrom huggingface_hub import snapshot_download\nsnapshot_download('google/spiqa', repo_type='dataset', local_dir='SPIQA')\nPY",
+          dataSize: "",
+          queryMod: "Image (figures/tables) + surrounding text",
+          targetMod: "Text (free-form answers, CoT evaluations)",
+          numQuery: 270000,
+          numCandidates: "",
+          customTags: [],
+        },
+        {
+          id: "seed-9",
+          type: "Evaluation Set",
+          task: "RecipeQA",
+          modality: "Text + Image",
+          domain: "Cooking / procedural knowledge",
+          dataPoints: 36786,
+          taskCategory: "Multimodal Procedural Reasoning",
+          description:
+            "Temporal and cross-modal reasoning benchmark over interleaved recipe instructions and images.",
+          specialty:
+            "Supports cloze, ordering, and coherence subtasks; requires grounding each step visually.",
+          paperLink:
+            "RecipeQA: A Challenge Dataset for Multimodal Comprehension of Cooking Recipes",
+          dataLink:
+            "Train JSON: https://vision.cs.hacettepe.edu.tr/recipeqa/train.json.gz\nVal JSON: https://vision.cs.hacettepe.edu.tr/recipeqa/val.json.gz\nTest JSON: https://vision.cs.hacettepe.edu.tr/recipeqa/test.json.gz\nImages (2.3 GB): https://vision.cs.hacettepe.edu.tr/recipeqa/images.zip",
+          loadData: "",
+          dataSize: "",
+          queryMod:
+            "Text + Image (stepwise recipe instructions with illustrative photos)",
+          targetMod: "Text / Choice",
+          numQuery: 36786,
+          numCandidates: "",
+          customTags: [],
+        },
+        {
+          id: "seed-10",
+          type: "Evaluation Set",
+          task: "OK-VQA",
+          modality: "Text + Image",
+          domain: "General world knowledge",
+          dataPoints: 14055,
+          taskCategory: "Knowledge-Based VQA",
+          description:
+            "VQA benchmark where outside knowledge is required; image alone is insufficient.",
+          specialty:
+            "Encourages retrieval of real-world facts to answer MSCOCO-based questions.",
+          paperLink: "",
+          dataLink: "https://okvqa.allenai.org/",
+          loadData:
+            "Annotations: https://okvqa.allenai.org/static/data/mscoco_train2014_annotations.json.zip\nQuestions: https://okvqa.allenai.org/static/data/OpenEnded_mscoco_train2014_questions.json.zip\nImages (COCO 2014): https://images.cocodataset.org/zips/",
+          dataSize: "",
+          queryMod: "Text + Image",
+          targetMod: "Text (Open-ended)",
+          numQuery: 14055,
+          numCandidates: "",
+          customTags: [],
+        },
+      ];
+
+      const parseTags = (value = "") =>
+        value
+          .split(/,|\n/)
+          .map((tag) => tag.trim())
+          .filter(Boolean);
+
+      const deriveAutoTags = (entry) => {
+        const tags = new Set();
+        const push = (value) => {
+          if (value && value.trim()) {
+            tags.add(value.trim());
+          }
+        };
+        push(entry.modality);
+        push(entry.domain);
+        if (entry.queryMod || entry.targetMod || entry.numQuery || entry.numCandidates) {
+          tags.add("RAG");
+        }
+        return Array.from(tags);
+      };
+
+      const combineTags = (entry) => {
+        return Array.from(new Set([...deriveAutoTags(entry), ...(entry.customTags || [])]));
+      };
+
+      const getSavedEntries = () => {
+        try {
+          const saved = localStorage.getItem(STORAGE_KEY);
+          if (saved) return JSON.parse(saved);
+          const legacyKeys = ["mmDatasetEntries-v2", "mmDatasetEntries-v1"];
+          for (const key of legacyKeys) {
+            const legacy = localStorage.getItem(key);
+            if (legacy) return JSON.parse(legacy);
+          }
+        } catch (error) {
+          console.warn("Unable to parse saved entries", error);
+        }
+        return null;
+      };
+
+      let datasetEntries = (getSavedEntries() ?? seedEntries).map((entry) => ({
+        ...entry,
+        customTags: Array.isArray(entry.customTags)
+          ? entry.customTags
+          : parseTags(entry.customTags || ""),
+      }));
+
+      const uniqueValues = (values) =>
+        [...new Set(values.filter((value) => value && value.trim()))].sort((a, b) =>
+          a.localeCompare(b)
+        );
+
+      const setSelectOptions = (select, values) => {
+        const placeholder = select.dataset.placeholder || "All";
+        const key = select.dataset.filterKey;
+        const current = filters[key];
+        select.innerHTML = "";
+        const baseOption = document.createElement("option");
+        baseOption.value = "";
+        baseOption.textContent = placeholder;
+        select.appendChild(baseOption);
+        values.forEach((value) => {
+          const option = document.createElement("option");
+          option.value = value;
+          option.textContent = value;
+          select.appendChild(option);
+        });
+        if (current && !values.includes(current)) {
+          filters[key] = "";
+          select.value = "";
+        } else if (current) {
+          select.value = current;
+        }
+      };
+
+      const populateFilterOptions = () => {
+        setSelectOptions(filterControls.type, uniqueValues(datasetEntries.map((entry) => entry.type)));
+        setSelectOptions(
+          filterControls.domain,
+          uniqueValues(datasetEntries.map((entry) => entry.domain))
+        );
+        setSelectOptions(
+          filterControls.tag,
+          uniqueValues(datasetEntries.flatMap((entry) => combineTags(entry)))
+        );
+      };
+
+      const persistEntries = () => {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(datasetEntries));
+        populateFilterOptions();
+      };
+
+      persistEntries();
+
+      ["type", "domain", "tag"].forEach((key) => {
+        filterControls[key].addEventListener("change", (event) => {
+          filters[key] = event.target.value;
+          renderTable();
+        });
+      });
+
+      filterControls.search.addEventListener("input", (event) => {
+        filters.search = event.target.value.trim().toLowerCase();
+        renderTable();
+      });
+
+      const formatNumber = (value) => {
+        if (value === undefined || value === null || value === "") return "—";
+        return Number(value).toLocaleString();
+      };
+
+      const textToNodes = (text = "") => {
+        const fragment = document.createDocumentFragment();
+        if (!text) {
+          fragment.appendChild(document.createTextNode("—"));
+          return fragment;
+        }
+
+        const paragraphs = text.split(/\n+/).filter((line) => line.trim().length);
+        paragraphs.forEach((paragraph, index) => {
+          if (index > 0) fragment.appendChild(document.createElement("br"));
+          fragment.appendChild(linkify(paragraph.trim()));
+        });
+        return fragment;
+      };
+
+      const renderLinkList = (text = "") => {
+        const fragment = document.createDocumentFragment();
+        const links = text
+          .split(/,|\n/)
+          .map((item) => item.trim())
+          .filter(Boolean);
+
+        if (!links.length) {
+          fragment.appendChild(document.createTextNode("—"));
+          return fragment;
+        }
+
+        const wrap = document.createElement("div");
+        wrap.className = "link-stack";
+
+        links.forEach((href, index) => {
+          const anchor = document.createElement("a");
+          anchor.href = href;
+          anchor.target = "_blank";
+          anchor.rel = "noopener noreferrer";
+          anchor.textContent = links.length > 1 ? `Link ${index + 1}` : "Link";
+          wrap.appendChild(anchor);
+        });
+
+        fragment.appendChild(wrap);
+        return fragment;
+      };
+
+      const linkify = (line) => {
+        const span = document.createElement("span");
+        let cursor = 0;
+        const urlRegex = /(https?:\/\/[^\s]+)/g;
+        let match;
+
+        while ((match = urlRegex.exec(line)) !== null) {
+          if (match.index > cursor) {
+            span.appendChild(document.createTextNode(line.slice(cursor, match.index)));
+          }
+
+          const anchor = document.createElement("a");
+          anchor.href = match[0];
+          anchor.textContent = match[0];
+          anchor.target = "_blank";
+          anchor.rel = "noopener noreferrer";
+          span.appendChild(anchor);
+          cursor = match.index + match[0].length;
+        }
+
+        if (cursor < line.length) {
+          span.appendChild(document.createTextNode(line.slice(cursor)));
+        }
+
+        return span;
+      };
+
+      const getFilteredEntries = () => {
+        return datasetEntries.filter((entry) => {
+          if (filters.type && entry.type !== filters.type) return false;
+          if (filters.domain && entry.domain !== filters.domain) return false;
+          const tags = combineTags(entry);
+          if (filters.tag) {
+            const match = tags.some(
+              (tag) => tag.toLowerCase() === filters.tag.toLowerCase()
+            );
+            if (!match) return false;
+          }
+          if (filters.search) {
+            const haystack = [
+              entry.type,
+              entry.task,
+              entry.modality,
+              entry.domain,
+              entry.taskCategory,
+              entry.description,
+              entry.specialty,
+              entry.paperLink,
+              entry.dataLink,
+              entry.loadData,
+              entry.dataSize,
+              ...tags,
+            ]
+              .join(" ")
+              .toLowerCase();
+            if (!haystack.includes(filters.search)) {
+              return false;
+            }
+          }
+          return true;
+        });
+      };
+
+      const renderTable = () => {
+        tableBody.replaceChildren(
+          ...getFilteredEntries().map((entry) => {
+            const row = document.createElement("tr");
+
+            const tagsCell = document.createElement("td");
+            tagsCell.className = "col-tags";
+            const tagStack = document.createElement("div");
+            tagStack.className = "tag-stack";
+            const tags = combineTags(entry);
+            if (tags.length) {
+              tags.forEach((tag) => tagStack.appendChild(createPill(tag)));
+            } else {
+              const placeholder = document.createElement("span");
+              placeholder.className = "muted";
+              placeholder.textContent = "—";
+              tagStack.appendChild(placeholder);
+            }
+            tagsCell.appendChild(tagStack);
+            const editButton = document.createElement("button");
+            editButton.type = "button";
+            editButton.className = "tag-edit";
+            editButton.textContent = "Edit";
+            editButton.addEventListener("click", () => editTags(entry.id));
+            tagsCell.appendChild(editButton);
+            row.appendChild(tagsCell);
+
+            row.appendChild(createCell(entry.type));
+            row.appendChild(createCell(entry.task));
+            row.appendChild(createCell(entry.modality));
+            row.appendChild(createCell(entry.domain));
+            row.appendChild(createCell(formatNumber(entry.dataPoints)));
+            row.appendChild(createCell(entry.taskCategory));
+            row.appendChild(createCell(entry.description, "col-description"));
+            row.appendChild(createCell(entry.specialty || "—"));
+            row.appendChild(createPaperCell(entry.paperLink));
+
+            const dataCell = document.createElement("td");
+            dataCell.appendChild(renderLinkList(entry.dataLink));
+            row.appendChild(dataCell);
+
+            const loadCell = document.createElement("td");
+            loadCell.classList.add("col-logistics");
+            loadCell.appendChild(textToNodes(entry.loadData));
+            row.appendChild(loadCell);
+
+            row.appendChild(createCell(entry.dataSize ? `${entry.dataSize} GB` : "—"));
+            row.appendChild(createRetrievalCell(entry));
+
+            const actionCell = document.createElement("td");
+            const actionWrap = document.createElement("div");
+            actionWrap.className = "table-actions";
+
+            const cloneButton = document.createElement("button");
+            cloneButton.type = "button";
+            cloneButton.className = "secondary";
+            cloneButton.textContent = "Clone";
+            cloneButton.addEventListener("click", () => cloneEntry(entry.id));
+
+            const deleteButton = document.createElement("button");
+            deleteButton.type = "button";
+            deleteButton.className = "danger";
+            deleteButton.textContent = "Delete";
+            deleteButton.addEventListener("click", () => deleteEntry(entry.id));
+
+            actionWrap.append(cloneButton, deleteButton);
+            actionCell.appendChild(actionWrap);
+            row.appendChild(actionCell);
+
+            return row;
+          })
+        );
+      };
+
+      const createCell = (value, className) => {
+        const cell = document.createElement("td");
+        if (className) cell.classList.add(className);
+        cell.textContent = value || "—";
+        return cell;
+      };
+
+      const createPaperCell = (paperLink) => {
+        const cell = document.createElement("td");
+        if (!paperLink) {
+          cell.textContent = "—";
+          return cell;
+        }
+        if (paperLink.startsWith("http")) {
+          const anchor = document.createElement("a");
+          anchor.href = paperLink;
+          anchor.textContent = "Paper";
+          anchor.target = "_blank";
+          anchor.rel = "noopener noreferrer";
+          cell.appendChild(anchor);
+        } else {
+          cell.appendChild(linkify(paperLink));
+        }
+        return cell;
+      };
+
+      const createRetrievalCell = (entry) => {
+        const cell = document.createElement("td");
+        const hasData = entry.queryMod || entry.targetMod || entry.numQuery || entry.numCandidates;
+        if (!hasData) {
+          cell.textContent = "—";
+          return cell;
+        }
+        if (entry.queryMod) {
+          cell.appendChild(createPill(`Query: ${entry.queryMod}`));
+        }
+        if (entry.targetMod) {
+          cell.appendChild(createPill(`Target: ${entry.targetMod}`));
+        }
+        if (entry.numQuery) {
+          cell.appendChild(createPill(`#Q ${formatNumber(entry.numQuery)}`));
+        }
+        if (entry.numCandidates) {
+          cell.appendChild(createPill(`#Cand ${formatNumber(entry.numCandidates)}`));
+        }
+        return cell;
+      };
+
+      const createPill = (text) => {
+        const pill = document.createElement("div");
+        pill.className = "pill";
+        pill.textContent = text;
+        return pill;
+      };
+
+      const cloneEntry = (id) => {
+        const entry = datasetEntries.find((item) => item.id === id);
+        if (!entry) return;
+        form.type.value = entry.type;
+        form.task.value = entry.task;
+        form.modality.value = entry.modality || "";
+        form.domain.value = entry.domain;
+        form.dataPoints.value = entry.dataPoints ?? "";
+        form.taskCategory.value = entry.taskCategory;
+        form.description.value = entry.description;
+        form.specialty.value = entry.specialty ?? "";
+        form.paperLink.value = entry.paperLink ?? "";
+        form.dataLink.value = entry.dataLink ?? "";
+        form.loadData.value = entry.loadData ?? "";
+        form.dataSize.value = entry.dataSize ?? "";
+        form.queryMod.value = entry.queryMod ?? "";
+        form.targetMod.value = entry.targetMod ?? "";
+        form.numQuery.value = entry.numQuery ?? "";
+        form.numCandidates.value = entry.numCandidates ?? "";
+        form.tags.value = (entry.customTags || []).join(", ");
+        retrievalDetails.open = Boolean(
+          entry.queryMod || entry.targetMod || entry.numQuery || entry.numCandidates
+        );
+        form.scrollIntoView({ behavior: "smooth", block: "start" });
+      };
+
+      const editTags = (id) => {
+        const entry = datasetEntries.find((item) => item.id === id);
+        if (!entry) return;
+        const current = (entry.customTags || []).join(", ");
+        const next = window.prompt("Update tags (comma-separated):", current);
+        if (next === null) return;
+        entry.customTags = parseTags(next);
+        persistEntries();
+        renderTable();
+      };
+
+      const deleteEntry = (id) => {
+        const attempt = window.prompt("Enter password to delete this entry:");
+        if (attempt !== "notawesome") {
+          if (attempt !== null) {
+            alert("Incorrect password. Row was not deleted.");
+          }
+          return;
+        }
+        datasetEntries = datasetEntries.filter((entry) => entry.id !== id);
+        persistEntries();
+        renderTable();
+      };
+
+      form.addEventListener("submit", (event) => {
+        event.preventDefault();
+        const formData = new FormData(form);
+        const customTags = parseTags(formData.get("tags"));
+        const newEntry = {
+          id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()),
+          type: formData.get("type"),
+          task: formData.get("task"),
+          modality: formData.get("modality"),
+          domain: formData.get("domain"),
+          dataPoints: formData.get("dataPoints") || "",
+          taskCategory: formData.get("taskCategory"),
+          description: formData.get("description"),
+          specialty: formData.get("specialty"),
+          paperLink: formData.get("paperLink"),
+          dataLink: formData.get("dataLink"),
+          loadData: formData.get("loadData"),
+          dataSize: formData.get("dataSize"),
+          queryMod: formData.get("queryMod"),
+          targetMod: formData.get("targetMod"),
+          numQuery: formData.get("numQuery") || "",
+          numCandidates: formData.get("numCandidates") || "",
+          customTags,
+        };
+
+        datasetEntries = [newEntry, ...datasetEntries];
+        persistEntries();
+        renderTable();
+        form.reset();
+        retrievalDetails.open = false;
+      });
+
+      renderTable();
+    </script>
+  </body>
+</html>
