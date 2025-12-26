@@ -42,9 +42,35 @@
         box-shadow: 0 25px 60px rgba(100, 116, 139, 0.12);
       }
 
+      .header-actions {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+      }
+
       h1 {
-        margin: 0 0 1.5rem;
+        margin: 0;
         font-size: clamp(2.1rem, 4vw, 3rem);
+      }
+
+      .add-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: linear-gradient(135deg, var(--accent), var(--accent-2));
+        color: #fff;
+        text-decoration: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 999px;
+        font-weight: 600;
+        box-shadow: 0 10px 20px rgba(124, 58, 237, 0.2);
+        transition: transform 0.2s;
+      }
+
+      .add-btn:hover {
+        transform: translateY(-2px);
+        text-decoration: none;
       }
 
       .card {
@@ -168,6 +194,25 @@
         transform: none;
       }
 
+      .button-link {
+        display: inline-block;
+        border: none;
+        border-radius: 999px;
+        padding: 0.65rem 1.4rem;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        background: linear-gradient(135deg, var(--accent), var(--accent-2));
+        color: #fff;
+        box-shadow: 0 15px 30px rgba(14, 165, 233, 0.25);
+        transition: transform 120ms ease, box-shadow 120ms ease;
+        text-decoration: none;
+      }
+
+      .button-link:hover {
+        transform: translateY(-1px);
+      }
+
       .table-section {
         margin-top: 2.2rem;
       }
@@ -216,108 +261,150 @@
         background: #fff;
       }
 
-      table {
-        width: 100%;
-        border-collapse: collapse;
-        table-layout: fixed;
-        min-width: 1050px;
-      }
-
-      thead {
-        background: linear-gradient(90deg, rgba(124, 58, 237, 0.12), rgba(14, 165, 233, 0.12));
-        text-transform: uppercase;
-        font-size: 0.78rem;
-        letter-spacing: 0.08em;
-        color: var(--ink-muted);
-      }
-
-      th,
-      td {
-        padding: 0.85rem 0.8rem;
-        border-bottom: 1px solid var(--border);
-        vertical-align: top;
-        width: 140px;
-        word-break: break-word;
-        overflow-wrap: anywhere;
-      }
-
-      th.col-description,
-      td.col-description {
-        width: 320px;
-      }
-
-      th.col-tags,
-      td.col-tags {
-        width: 200px;
-      }
-
-      th.col-logistics,
-      td.col-logistics {
-        width: 220px;
-      }
-
-      tbody tr:last-child td {
-        border-bottom: none;
-      }
-
-      tbody tr:hover td {
-        background: var(--accent-soft);
-      }
-
-      .pill {
-        display: inline-flex;
-        align-items: center;
-        padding: 0.18rem 0.7rem;
-        border-radius: 999px;
-        font-size: 0.78rem;
-        font-weight: 600;
-        background: rgba(79, 70, 229, 0.15);
-        color: var(--ink);
-        margin-right: 0.25rem;
-        margin-bottom: 0.2rem;
-      }
-
-      .link-stack {
+      .dataset-grid {
         display: flex;
         flex-direction: column;
-        gap: 0.35rem;
+        gap: 1.5rem;
       }
 
-      .tag-stack {
+      .dataset-card {
+        background: #fff;
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+      }
+
+      .card-header {
         display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 1rem;
         flex-wrap: wrap;
-        gap: 0.35rem;
-        margin-bottom: 0.5rem;
+        gap: 1rem;
       }
 
-      .tag-edit {
-        border: 1px solid rgba(124, 58, 237, 0.3);
-        background: transparent;
-        color: var(--accent);
-        border-radius: 999px;
-        padding: 0.3rem 0.8rem;
-        font-size: 0.78rem;
-        font-weight: 600;
-      }
-
-      a {
-        color: var(--accent);
-        text-decoration: none;
-      }
-
-      a:hover {
-        text-decoration: underline;
-      }
-
-      .table-actions {
+      .card-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--ink);
+        margin: 0;
         display: flex;
-        gap: 0.4rem;
+        align-items: center;
+        gap: 0.75rem;
         flex-wrap: wrap;
       }
-
-      .table-actions button {
-        padding: 0.4rem 0.9rem;
+      
+      .card-title a {
         font-size: 0.85rem;
+        font-weight: 500;
+        background: var(--bg-start);
+        padding: 0.2rem 0.6rem;
+        border-radius: 6px;
+        border: 1px solid var(--border);
+        text-decoration: none;
+        color: var(--accent);
+      }
+
+      .card-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-bottom: 1.25rem;
+      }
+      
+      .tag-pill {
+        background: var(--card-accent);
+        border: 1px solid var(--border);
+        padding: 0.25rem 0.75rem;
+        border-radius: 99px;
+        font-size: 0.85rem;
+        color: var(--ink);
+        font-weight: 500;
+      }
+      
+      .tag-pill.highlight {
+        background: rgba(124, 58, 237, 0.08);
+        color: var(--accent);
+        border-color: rgba(124, 58, 237, 0.2);
+      }
+
+      .card-content {
+        display: grid;
+        grid-template-columns: 1.8fr 1.2fr;
+        gap: 2rem;
+        font-size: 0.95rem;
+        color: var(--ink);
+      }
+      
+      @media (max-width: 900px) {
+        .card-content {
+          grid-template-columns: 1fr;
+          gap: 1rem;
+        }
+      }
+
+      .card-description p {
+        margin-top: 0;
+        line-height: 1.6;
+      }
+      
+      .card-logistics {
+        background: var(--card-accent);
+        padding: 1.25rem;
+        border-radius: 12px;
+        font-size: 0.9rem;
+        border: 1px solid var(--border);
+      }
+      
+      .logistics-item {
+        margin-bottom: 0.8rem;
+      }
+      
+      .logistics-item:last-child {
+        margin-bottom: 0;
+      }
+      
+      .logistics-label {
+        font-weight: 600;
+        display: block;
+        margin-bottom: 0.3rem;
+        color: var(--ink-muted);
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+
+      .card-retrieval {
+        margin-top: 1.5rem;
+        padding-top: 1.25rem;
+        border-top: 1px solid var(--border);
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+      }
+      
+      .retrieval-item {
+        display: flex;
+        flex-direction: column;
+        gap: 0.3rem;
+      }
+      
+      .retrieval-label {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        color: var(--ink-muted);
+        font-weight: 700;
+        letter-spacing: 0.05em;
+      }
+      
+      .retrieval-value {
+        font-weight: 500;
+      }
+
+      .card-actions {
+        display: flex;
+        gap: 0.5rem;
       }
 
       .muted {
@@ -338,130 +425,12 @@
   </head>
   <body>
     <main>
-      <h1>Multimodal Dataset Registry</h1>
-
-      <section class="card">
-        <form id="dataset-form">
-          <fieldset>
-            <legend>Dataset overview</legend>
-            <div class="field-grid">
-              <label>
-                Type *
-                <span class="helper">Select dataset role</span>
-                <select name="type" required>
-                  <option value=""></option>
-                  <option>Evaluation Set</option>
-                  <option>Training Set</option>
-                  <option>Benchmark</option>
-                  <option>Other</option>
-                </select>
-              </label>
-              <label>
-                Task *
-                <span class="helper">Dataset / benchmark name</span>
-                <input type="text" name="task" required />
-              </label>
-              <label>
-                Primary modality *
-                <span class="helper">Hold Cmd/Ctrl to select multiple</span>
-                <select name="modality" id="modality" multiple required>
-                  <option value="Text">Text</option>
-                  <option value="Image">Image</option>
-                  <option value="Video">Video</option>
-                  <option value="Audio">Audio</option>
-                  <option value="Table">Table</option>
-                  <option value="Thermal">Thermal</option>
-                  <option value="IMU">IMU</option>
-                  <option value="Other">Other</option>
-                </select>
-              </label>
-              <label>
-                Domain *
-                <span class="helper">Primary context</span>
-                <input type="text" name="domain" required />
-              </label>
-              <label>
-                Data points
-                <span class="helper">Total samples</span>
-                <input type="number" name="dataPoints" min="0" />
-              </label>
-              <label>
-                Task category *
-                <span class="helper">e.g., Visual QA</span>
-                <input type="text" name="taskCategory" required />
-              </label>
-              <label>
-                Tags
-                <span class="helper">Comma-separated optional labels</span>
-                <input type="text" name="tags" placeholder="mRAG, cooking" />
-              </label>
-            </div>
-          </fieldset>
-
-          <fieldset>
-            <legend>Download &amp; Logistics</legend>
-            <div class="field-grid">
-              <label>
-                Data link(s) *
-                <span class="helper">Add URLs or repo paths, separate multiple with commas.</span>
-                <textarea name="dataLink" required></textarea>
-              </label>
-              <label>
-                Load / download instructions
-                <span class="helper">Script fragments or helper notes.</span>
-                <textarea name="loadData"></textarea>
-              </label>
-              <label>
-                Data size (GB)
-                <span class="helper">Approximate download footprint.</span>
-                <input type="number" name="dataSize" step="0.1" min="0" />
-              </label>
-            </div>
-          </fieldset>
-
-          <label>
-            Description *
-            <textarea name="description" required></textarea>
-          </label>
-
-          <label>
-            Specialty / nuance
-            <textarea name="specialty"></textarea>
-          </label>
-
-          <label>
-            Paper link
-            <input type="text" name="paperLink" />
-          </label>
-
-          <details class="retrieval" id="retrieval-details">
-            <summary>Retrieval-specific metadata (optional)</summary>
-            <div class="field-grid">
-              <label>
-                Query modality
-                <input type="text" name="queryMod" />
-              </label>
-              <label>
-                Target modality
-                <input type="text" name="targetMod" />
-              </label>
-              <label>
-                Number of queries
-                <input type="number" name="numQuery" min="0" />
-              </label>
-              <label>
-                Number of candidates
-                <input type="number" name="numCandidates" min="0" />
-              </label>
-            </div>
-          </details>
-
-          <div class="actions">
-            <button type="reset" class="secondary">Reset</button>
-            <button type="submit">Add dataset entry</button>
-          </div>
-        </form>
-      </section>
+      <div class="header-actions">
+        <h1>Multimodal Dataset Registry</h1>
+        <a href="add-dataset/" class="add-btn">
+          <span>+</span> Add New Dataset
+        </a>
+      </div>
 
       <section class="table-section">
         <div class="table-filters">
@@ -485,28 +454,7 @@
           </div>
         </div>
         <div class="table-wrapper">
-          <table id="dataset-table">
-            <thead>
-              <tr>
-                <th class="col-tags">Tags</th>
-                <th>Type</th>
-                <th>Task</th>
-                <th>Modality</th>
-                <th>Domain</th>
-                <th>Data points</th>
-                <th>Task category</th>
-                <th class="col-description">Description</th>
-                <th>Specialty</th>
-                <th>Paper</th>
-                <th>Data link</th>
-                <th class="col-logistics">Load / Logistics</th>
-                <th>Size</th>
-                <th>Retrieval</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody></tbody>
-          </table>
+          <div id="dataset-grid" class="dataset-grid"></div>
         </div>
       </section>
     </main>
@@ -514,9 +462,7 @@
     <script>
       const STORAGE_KEY = "mmDatasetEntries-v3";
 
-      const form = document.getElementById("dataset-form");
-      const tableBody = document.querySelector("#dataset-table tbody");
-      const retrievalDetails = document.getElementById("retrieval-details");
+      const gridContainer = document.getElementById("dataset-grid");
       const filterControls = {
         type: document.getElementById("filter-type"),
         domain: document.getElementById("filter-domain"),
@@ -1027,77 +973,153 @@
       };
 
       const renderTable = () => {
-        tableBody.replaceChildren(
-          ...getFilteredEntries().map((entry) => {
-            const row = document.createElement("tr");
-
-            const tagsCell = document.createElement("td");
-            tagsCell.className = "col-tags";
-            const tagStack = document.createElement("div");
-            tagStack.className = "tag-stack";
-            const tags = combineTags(entry);
-            if (tags.length) {
-              tags.forEach((tag) => tagStack.appendChild(createPill(tag)));
-            } else {
-              const placeholder = document.createElement("span");
-              placeholder.className = "muted";
-              placeholder.textContent = "—";
-              tagStack.appendChild(placeholder);
-            }
-            tagsCell.appendChild(tagStack);
-            const editButton = document.createElement("button");
-            editButton.type = "button";
-            editButton.className = "tag-edit";
-            editButton.textContent = "Edit";
-            editButton.addEventListener("click", () => editTags(entry.id));
-            tagsCell.appendChild(editButton);
-            row.appendChild(tagsCell);
-
-            row.appendChild(createCell(entry.type));
-            row.appendChild(createCell(entry.task));
-            row.appendChild(createCell(formatModalities(entry.modalities)));
-            row.appendChild(createCell(entry.domain));
-            row.appendChild(createCell(formatNumber(entry.dataPoints)));
-            row.appendChild(createCell(entry.taskCategory));
-            row.appendChild(createCell(entry.description, "col-description"));
-            row.appendChild(createCell(entry.specialty || "—"));
-            row.appendChild(createPaperCell(entry.paperLink));
-
-            const dataCell = document.createElement("td");
-            dataCell.appendChild(renderLinkList(entry.dataLink));
-            row.appendChild(dataCell);
-
-            const loadCell = document.createElement("td");
-            loadCell.classList.add("col-logistics");
-            loadCell.appendChild(textToNodes(entry.loadData));
-            row.appendChild(loadCell);
-
-            row.appendChild(createCell(entry.dataSize ? `${entry.dataSize} GB` : "—"));
-            row.appendChild(createRetrievalCell(entry));
-
-            const actionCell = document.createElement("td");
-            const actionWrap = document.createElement("div");
-            actionWrap.className = "table-actions";
-
-            const cloneButton = document.createElement("button");
-            cloneButton.type = "button";
-            cloneButton.className = "secondary";
-            cloneButton.textContent = "Clone";
-            cloneButton.addEventListener("click", () => cloneEntry(entry.id));
-
-            const deleteButton = document.createElement("button");
-            deleteButton.type = "button";
-            deleteButton.className = "danger";
-            deleteButton.textContent = "Delete";
-            deleteButton.addEventListener("click", () => deleteEntry(entry.id));
-
-            actionWrap.append(cloneButton, deleteButton);
-            actionCell.appendChild(actionWrap);
-            row.appendChild(actionCell);
-
-            return row;
-          })
+        gridContainer.replaceChildren(
+          ...getFilteredEntries().map((entry) => createCard(entry))
         );
+      };
+
+      const createCard = (entry) => {
+        const card = document.createElement("div");
+        card.className = "dataset-card";
+
+        // Header
+        const header = document.createElement("div");
+        header.className = "card-header";
+
+        const title = document.createElement("h3");
+        title.className = "card-title";
+        title.textContent = entry.task;
+        if (entry.paperLink) {
+          const paper = document.createElement("a");
+          paper.href = entry.paperLink;
+          paper.target = "_blank";
+          paper.rel = "noopener noreferrer";
+          paper.textContent = "Paper";
+          title.appendChild(paper);
+        }
+        header.appendChild(title);
+
+        const actions = document.createElement("div");
+        actions.className = "card-actions";
+
+        const editTagsBtn = document.createElement("button");
+        editTagsBtn.type = "button";
+        editTagsBtn.className = "secondary";
+        editTagsBtn.textContent = "Edit Tags";
+        editTagsBtn.addEventListener("click", () => editTags(entry.id));
+
+        const cloneBtn = document.createElement("button");
+        cloneBtn.type = "button";
+        cloneBtn.className = "secondary";
+        cloneBtn.textContent = "Clone";
+        cloneBtn.addEventListener("click", () => cloneEntry(entry.id));
+
+        const deleteBtn = document.createElement("button");
+        deleteBtn.type = "button";
+        deleteBtn.className = "danger";
+        deleteBtn.textContent = "Delete";
+        deleteBtn.addEventListener("click", () => deleteEntry(entry.id));
+
+        actions.append(editTagsBtn, cloneBtn, deleteBtn);
+        header.appendChild(actions);
+        card.appendChild(header);
+
+        // Tags
+        const tagsRow = document.createElement("div");
+        tagsRow.className = "card-tags";
+
+        const addPill = (text, highlight = false) => {
+          if (!text || text === "—") return;
+          const pill = document.createElement("span");
+          pill.className = `tag-pill ${highlight ? "highlight" : ""}`;
+          pill.textContent = text;
+          tagsRow.appendChild(pill);
+        };
+
+        addPill(entry.type, true);
+        addPill(entry.domain);
+        addPill(formatModalities(entry.modalities));
+        addPill(entry.taskCategory);
+        if (entry.dataPoints) addPill(`${formatNumber(entry.dataPoints)} samples`);
+        if (entry.dataSize) addPill(`${entry.dataSize} GB`);
+        (entry.customTags || []).forEach((tag) => addPill(tag));
+
+        card.appendChild(tagsRow);
+
+        // Content
+        const contentRow = document.createElement("div");
+        contentRow.className = "card-content";
+
+        const mainInfo = document.createElement("div");
+        mainInfo.className = "card-description";
+        const descP = document.createElement("p");
+        descP.textContent = entry.description;
+        mainInfo.appendChild(descP);
+
+        if (entry.specialty) {
+          const specP = document.createElement("p");
+          specP.innerHTML = `<strong>Specialty:</strong> ${entry.specialty}`;
+          mainInfo.appendChild(specP);
+        }
+        contentRow.appendChild(mainInfo);
+
+        const logistics = document.createElement("div");
+        logistics.className = "card-logistics";
+
+        if (entry.dataLink) {
+          const item = document.createElement("div");
+          item.className = "logistics-item";
+          const label = document.createElement("span");
+          label.className = "logistics-label";
+          label.textContent = "Data Links";
+          item.appendChild(label);
+          item.appendChild(renderLinkList(entry.dataLink));
+          logistics.appendChild(item);
+        }
+
+        if (entry.loadData) {
+          const item = document.createElement("div");
+          item.className = "logistics-item";
+          const label = document.createElement("span");
+          label.className = "logistics-label";
+          label.textContent = "Load / Logistics";
+          item.appendChild(label);
+          item.appendChild(textToNodes(entry.loadData));
+          logistics.appendChild(item);
+        }
+        contentRow.appendChild(logistics);
+        card.appendChild(contentRow);
+
+        // Retrieval
+        const hasRetrieval =
+          entry.queryMod || entry.targetMod || entry.numQuery || entry.numCandidates;
+        if (hasRetrieval) {
+          const retrievalRow = document.createElement("div");
+          retrievalRow.className = "card-retrieval";
+
+          const addRetItem = (label, value) => {
+            if (!value) return;
+            const item = document.createElement("div");
+            item.className = "retrieval-item";
+            item.innerHTML = `<span class="retrieval-label">${label}</span><span class="retrieval-value">${value}</span>`;
+            retrievalRow.appendChild(item);
+          };
+
+          addRetItem("Query Modality", entry.queryMod);
+          addRetItem("Target Modality", entry.targetMod);
+          addRetItem(
+            "Num Queries",
+            entry.numQuery ? formatNumber(entry.numQuery) : null
+          );
+          addRetItem(
+            "Num Candidates",
+            entry.numCandidates ? formatNumber(entry.numCandidates) : null
+          );
+
+          card.appendChild(retrievalRow);
+        }
+
+        return card;
       };
 
       const createCell = (value, className) => {
@@ -1107,78 +1129,13 @@
         return cell;
       };
 
-      const createPaperCell = (paperLink) => {
-        const cell = document.createElement("td");
-        if (!paperLink) {
-          cell.textContent = "—";
-          return cell;
-        }
-        if (paperLink.startsWith("http")) {
-          const anchor = document.createElement("a");
-          anchor.href = paperLink;
-          anchor.textContent = "Paper";
-          anchor.target = "_blank";
-          anchor.rel = "noopener noreferrer";
-          cell.appendChild(anchor);
-        } else {
-          cell.appendChild(linkify(paperLink));
-        }
-        return cell;
-      };
-
-      const createRetrievalCell = (entry) => {
-        const cell = document.createElement("td");
-        const hasData = entry.queryMod || entry.targetMod || entry.numQuery || entry.numCandidates;
-        if (!hasData) {
-          cell.textContent = "—";
-          return cell;
-        }
-        if (entry.queryMod) {
-          cell.appendChild(createPill(`Query: ${entry.queryMod}`));
-        }
-        if (entry.targetMod) {
-          cell.appendChild(createPill(`Target: ${entry.targetMod}`));
-        }
-        if (entry.numQuery) {
-          cell.appendChild(createPill(`#Q ${formatNumber(entry.numQuery)}`));
-        }
-        if (entry.numCandidates) {
-          cell.appendChild(createPill(`#Cand ${formatNumber(entry.numCandidates)}`));
-        }
-        return cell;
-      };
-
-      const createPill = (text) => {
-        const pill = document.createElement("div");
-        pill.className = "pill";
-        pill.textContent = text;
-        return pill;
-      };
-
       const cloneEntry = (id) => {
         const entry = datasetEntries.find((item) => item.id === id);
         if (!entry) return;
-        form.type.value = entry.type;
-        form.task.value = entry.task;
-        setSelectValues(form.modality, entry.modalities);
-        form.domain.value = entry.domain;
-        form.dataPoints.value = entry.dataPoints ?? "";
-        form.taskCategory.value = entry.taskCategory;
-        form.description.value = entry.description;
-        form.specialty.value = entry.specialty ?? "";
-        form.paperLink.value = entry.paperLink ?? "";
-        form.dataLink.value = entry.dataLink ?? "";
-        form.loadData.value = entry.loadData ?? "";
-        form.dataSize.value = entry.dataSize ?? "";
-        form.queryMod.value = entry.queryMod ?? "";
-        form.targetMod.value = entry.targetMod ?? "";
-        form.numQuery.value = entry.numQuery ?? "";
-        form.numCandidates.value = entry.numCandidates ?? "";
-        form.tags.value = (entry.customTags || []).join(", ");
-        retrievalDetails.open = Boolean(
-          entry.queryMod || entry.targetMod || entry.numQuery || entry.numCandidates
-        );
-        form.scrollIntoView({ behavior: "smooth", block: "start" });
+        
+        // Store entry in session storage to be picked up by the add-dataset page
+        sessionStorage.setItem("cloneEntry", JSON.stringify(entry));
+        window.location.href = "add-dataset/";
       };
 
       const editTags = (id) => {
@@ -1211,38 +1168,6 @@
         persistEntries();
         renderTable();
       };
-
-      form.addEventListener("submit", (event) => {
-        event.preventDefault();
-        const formData = new FormData(form);
-        const customTags = parseTags(formData.get("tags"));
-        const newEntry = {
-          id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()),
-          type: formData.get("type"),
-          task: formData.get("task"),
-          modalities: normalizeModalities(getSelectValues(form.modality)),
-          domain: formData.get("domain"),
-          dataPoints: formData.get("dataPoints") || "",
-          taskCategory: formData.get("taskCategory"),
-          description: formData.get("description"),
-          specialty: formData.get("specialty"),
-          paperLink: formData.get("paperLink"),
-          dataLink: formData.get("dataLink"),
-          loadData: formData.get("loadData"),
-          dataSize: formData.get("dataSize"),
-          queryMod: formData.get("queryMod"),
-          targetMod: formData.get("targetMod"),
-          numQuery: formData.get("numQuery") || "",
-          numCandidates: formData.get("numCandidates") || "",
-          customTags,
-        };
-
-        datasetEntries = [newEntry, ...datasetEntries];
-        persistEntries();
-        renderTable();
-        form.reset();
-        retrievalDetails.open = false;
-      });
 
       renderTable();
     </script>

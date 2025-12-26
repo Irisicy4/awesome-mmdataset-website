@@ -1,8 +1,8 @@
 baseurl: https://irisicy4.github.io/awesome-mmdataset-website/
 languageCode: en-us
 theme: hugo-theme-stack
-title: Bingyang (Icy) Wang
-copyright: Bingyang Wang
+title: Multimodal Dataset Registry
+copyright: Awesome Multimodal Dataset
 
 # Theme i18n support
 DefaultContentLanguage: en
@@ -13,15 +13,11 @@ hasCJKLanguage: false
 languages:
     en:
         languageName: English
-        title: Bingyang (Icy) Wang
+        title: Multimodal Dataset Registry
         weight: 1
         params:
             sidebar:
-                subtitle: Quantitative Analyst & AI Researcher
-
-services:
-    googleAnalytics:
-        id: ""
+                subtitle: A curated list of multimodal datasets
 
 pagination:
     pagerSize: 10
@@ -31,6 +27,8 @@ permalinks:
     page: /:slug/
 
 params:
+    description: "A curated list of multimodal datasets."
+    author: "Awesome Multimodal Dataset"
     mainSections:
         - post
     featuredImageField: image
@@ -39,12 +37,8 @@ params:
     favicon: /img/favicon.ico
     
     sidebar:
-        emoji: 👋
-        subtitle: Quantitative Analyst at RBC Capital Markets & MS CS at Georgia Tech
-        avatar:
-            enabled: true
-            local: true
-            src: img/avatar.png
+        emoji: 📚
+        subtitle: A curated list of multimodal datasets
     
     article:
         math: false
@@ -52,13 +46,6 @@ params:
         readingTime: true
         license:
             enabled: false
-    
-    comments:
-        enabled: false
-    
-    widgets:
-        homepage: []
-        page: []
     
     opengraph:
         enabled: true
@@ -95,18 +82,8 @@ markup:
 menu:
     main: []
     social:
-        - identifier: linkedin
-          name: LinkedIn
-          url: http://linkedin.com/in/bingyang-icy-wang
-          params:
-              icon: brand-linkedin
         - identifier: github
           name: GitHub
-          url: https://github.com/Irisicy4
+          url: https://github.com/Irisicy4/awesome-mmdataset-website
           params:
               icon: brand-github
-        - identifier: google-scholar
-          name: Google Scholar
-          url: https://scholar.google.com/citations?user=UA270iMAAAAJ&hl=en&authuser=1
-          params:
-              icon: link

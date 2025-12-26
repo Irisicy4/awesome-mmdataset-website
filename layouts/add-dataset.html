@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Add New Dataset - Multimodal Dataset Registry</title>
+    <style>
+      :root {
+        --bg-start: #fdf4ff;
+        --bg-end: #eef6ff;
+        --card: #ffffff;
+        --card-accent: #f6f8ff;
+        --ink: #1f2a37;
+        --ink-muted: #6b7280;
+        --border: #e3e8f4;
+        --accent: #7c3aed;
+        --accent-2: #0ea5e9;
+        --accent-soft: rgba(124, 58, 237, 0.08);
+        --danger: #db2777;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: "Inter", "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+        color: var(--ink);
+        background: linear-gradient(140deg, var(--bg-start), var(--bg-end));
+        padding: clamp(1.5rem, 4vw, 2.75rem);
+      }
+
+      main {
+        max-width: 1200px;
+        margin: 0 auto;
+        background: var(--card);
+        border-radius: 28px;
+        padding: clamp(1.5rem, 4vw, 2.5rem);
+        border: 1px solid var(--border);
+        box-shadow: 0 25px 60px rgba(100, 116, 139, 0.12);
+      }
+
+      h1 {
+        margin: 0 0 1.5rem;
+        font-size: clamp(1.8rem, 4vw, 2.5rem);
+      }
+
+      .back-link {
+        display: inline-block;
+        margin-bottom: 1.5rem;
+        color: var(--accent);
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 0.9rem;
+      }
+
+      .back-link:hover {
+        text-decoration: underline;
+      }
+
+      .card {
+        background: var(--card-accent);
+        border-radius: 20px;
+        border: 1px solid var(--border);
+        padding: clamp(1.25rem, 3vw, 1.75rem);
+      }
+
+      form {
+        display: flex;
+        flex-direction: column;
+        gap: 1.2rem;
+      }
+
+      fieldset {
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 1rem 1.2rem 1.2rem;
+        margin: 0;
+        background: #fff;
+      }
+
+      fieldset legend {
+        padding: 0 0.4rem;
+        text-transform: uppercase;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        color: var(--accent);
+      }
+
+      .field-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 1rem;
+      }
+
+      label {
+        display: flex;
+        flex-direction: column;
+        gap: 0.35rem;
+        font-weight: 600;
+        font-size: 0.9rem;
+      }
+
+      label span.helper {
+        font-size: 0.78rem;
+        font-weight: 500;
+        color: var(--ink-muted);
+      }
+
+      input,
+      select,
+      textarea {
+        border-radius: 12px;
+        border: 1px solid #d4dbe8;
+        padding: 0.65rem 0.85rem;
+        font-family: inherit;
+        font-size: 1rem;
+        background: #fff;
+        color: var(--ink);
+      }
+
+      textarea {
+        min-height: 80px;
+        resize: vertical;
+      }
+
+      summary {
+        cursor: pointer;
+        font-weight: 600;
+        color: var(--accent);
+        margin-bottom: 0.8rem;
+      }
+
+      details.retrieval {
+        border: 1px dashed var(--border);
+        border-radius: 16px;
+        padding: 0.9rem 1rem 0.4rem;
+        background: var(--card-accent);
+      }
+
+      .actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+      }
+
+      button {
+        border: none;
+        border-radius: 999px;
+        padding: 0.65rem 1.4rem;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        background: linear-gradient(135deg, var(--accent), var(--accent-2));
+        color: #fff;
+        box-shadow: 0 15px 30px rgba(14, 165, 233, 0.25);
+        transition: transform 120ms ease, box-shadow 120ms ease;
+      }
+
+      button.secondary {
+        background: #fff;
+        color: var(--accent);
+        border: 1px solid rgba(124, 58, 237, 0.4);
+        box-shadow: none;
+      }
+
+      button:hover {
+        transform: translateY(-1px);
+      }
+
+      button.secondary:hover {
+        transform: none;
+      }
+
+      .autofill-section {
+        background: #eff6ff;
+        border: 1px solid #bfdbfe;
+        margin-bottom: 2rem;
+      }
+
+      .autofill-section h2 {
+        margin-top: 0;
+        font-size: 1.25rem;
+        color: #1e40af;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .autofill-section p {
+        color: #1e3a8a;
+        font-size: 0.95rem;
+        margin-bottom: 1.2rem;
+        line-height: 1.5;
+      }
+
+      .autofill-grid {
+        display: grid;
+        grid-template-columns: 2fr 1fr auto;
+        gap: 0.8rem;
+      }
+
+      @media (max-width: 700px) {
+        .autofill-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .status-msg {
+        margin-top: 0.8rem;
+        font-size: 0.9rem;
+        font-weight: 600;
+        min-height: 1.4em;
+      }
+      
+      .status-msg.error { color: #dc2626; }
+      .status-msg.success { color: #059669; }
+      .status-msg.loading { color: #2563eb; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <a href="../" class="back-link">← Back to Registry</a>
+      <h1>Add New Dataset</h1>
+
+      <section class="card autofill-section">
+        <h2>🤖 Auto-fill with AI</h2>
+        <p>
+          Paste a dataset URL (HuggingFace, GitHub, Paper) and your OpenAI API Key to auto-extract metadata. 
+          The page content will be read and processed by GPT-4o to fill the form below.
+        </p>
+        <div class="autofill-grid">
+          <input type="url" id="autofill-url" placeholder="https://huggingface.co/datasets/..." required />
+          <input type="password" id="autofill-key" placeholder="sk-..." required />
+          <button type="button" id="btn-autofill">Auto-fill</button>
+        </div>
+        <div id="autofill-status" class="status-msg"></div>
+      </section>
+
+      <section class="card">
+        <form id="dataset-form">
+          <fieldset>
+            <legend>Dataset overview</legend>
+            <div class="field-grid">
+              <label>
+                Type *
+                <span class="helper">Select dataset role</span>
+                <select name="type" required>
+                  <option value=""></option>
+                  <option>Evaluation Set</option>
+                  <option>Training Set</option>
+                  <option>Benchmark</option>
+                  <option>Other</option>
+                </select>
+              </label>
+              <label>
+                Task *
+                <span class="helper">Dataset / benchmark name</span>
+                <input type="text" name="task" required />
+              </label>
+              <label>
+                Primary modality *
+                <span class="helper">Hold Cmd/Ctrl to select multiple</span>
+                <select name="modality" id="modality" multiple required>
+                  <option value="Text">Text</option>
+                  <option value="Image">Image</option>
+                  <option value="Video">Video</option>
+                  <option value="Audio">Audio</option>
+                  <option value="Table">Table</option>
+                  <option value="Thermal">Thermal</option>
+                  <option value="IMU">IMU</option>
+                  <option value="Other">Other</option>
+                </select>
+              </label>
+              <label>
+                Domain *
+                <span class="helper">Primary context</span>
+                <input type="text" name="domain" required />
+              </label>
+              <label>
+                Data points
+                <span class="helper">Total samples</span>
+                <input type="number" name="dataPoints" min="0" />
+              </label>
+              <label>
+                Task category *
+                <span class="helper">e.g., Visual QA</span>
+                <input type="text" name="taskCategory" required />
+              </label>
+              <label>
+                Tags
+                <span class="helper">Comma-separated optional labels</span>
+                <input type="text" name="tags" placeholder="mRAG, cooking" />
+              </label>
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend>Download &amp; Logistics</legend>
+            <div class="field-grid">
+              <label>
+                Data link(s) *
+                <span class="helper">Add URLs or repo paths, separate multiple with commas.</span>
+                <textarea name="dataLink" required></textarea>
+              </label>
+              <label>
+                Load / download instructions
+                <span class="helper">Script fragments or helper notes.</span>
+                <textarea name="loadData"></textarea>
+              </label>
+              <label>
+                Data size (GB)
+                <span class="helper">Approximate download footprint.</span>
+                <input type="number" name="dataSize" step="0.1" min="0" />
+              </label>
+            </div>
+          </fieldset>
+
+          <label>
+            Description *
+            <textarea name="description" required></textarea>
+          </label>
+
+          <label>
+            Specialty / nuance
+            <textarea name="specialty"></textarea>
+          </label>
+
+          <label>
+            Paper link
+            <input type="text" name="paperLink" />
+          </label>
+
+          <details class="retrieval" id="retrieval-details">
+            <summary>Retrieval-specific metadata (optional)</summary>
+            <div class="field-grid">
+              <label>
+                Query modality
+                <input type="text" name="queryMod" />
+              </label>
+              <label>
+                Target modality
+                <input type="text" name="targetMod" />
+              </label>
+              <label>
+                Number of queries
+                <input type="number" name="numQuery" min="0" />
+              </label>
+              <label>
+                Number of candidates
+                <input type="number" name="numCandidates" min="0" />
+              </label>
+            </div>
+          </details>
+
+          <div class="actions">
+            <button type="reset" class="secondary">Reset</button>
+            <button type="submit">Add dataset entry</button>
+          </div>
+        </form>
+      </section>
+    </main>
+
+    <script>
+      const STORAGE_KEY = "mmDatasetEntries-v3";
+      const form = document.getElementById("dataset-form");
+      const retrievalDetails = document.getElementById("retrieval-details");
+      const MODALITY_OPTIONS = ["Text", "Image", "Video", "Audio", "Table", "Thermal", "IMU", "Other"];
+
+      const normalizeModalities = (value) => {
+        const rawList = Array.isArray(value)
+          ? value
+          : typeof value === "string"
+          ? value.split(/[+,\/]+/)
+          : [];
+
+        const normalized = rawList
+          .map((token) => token.trim())
+          .filter(Boolean)
+          .map((token) => {
+            const exactMatch = MODALITY_OPTIONS.find(
+              (option) => option.toLowerCase() === token.toLowerCase()
+            );
+            if (exactMatch) return exactMatch;
+            if (/table/i.test(token)) return "Table";
+            if (/thermal/i.test(token)) return "Thermal";
+            if (/imu/i.test(token)) return "IMU";
+            if (/video/i.test(token)) return "Video";
+            if (/audio|speech/i.test(token)) return "Audio";
+            if (/image|vision|visual/i.test(token)) return "Image";
+            if (/text|language/i.test(token)) return "Text";
+            return "Other";
+          });
+
+        const unique = [...new Set(normalized)];
+        return unique.sort(
+          (a, b) => MODALITY_OPTIONS.indexOf(a) - MODALITY_OPTIONS.indexOf(b)
+        );
+      };
+
+      const getSelectValues = (select) =>
+        Array.from(select.selectedOptions || []).map((option) => option.value);
+
+      const parseTags = (value = "") =>
+        value
+          .split(/,|\n/)
+          .map((tag) => tag.trim())
+          .filter(Boolean);
+
+      const getSavedEntries = () => {
+        try {
+          const saved = localStorage.getItem(STORAGE_KEY);
+          if (saved) return JSON.parse(saved);
+          const legacyKeys = ["mmDatasetEntries-v2", "mmDatasetEntries-v1"];
+          for (const key of legacyKeys) {
+            const legacy = localStorage.getItem(key);
+            if (legacy) return JSON.parse(legacy);
+          }
+        } catch (error) {
+          console.warn("Unable to parse saved entries", error);
+        }
+        return [];
+      };
+
+      // Check for clone data
+      const cloneSource = sessionStorage.getItem("cloneEntry");
+      if (cloneSource) {
+        try {
+          const entry = JSON.parse(cloneSource);
+          form.type.value = entry.type;
+          form.task.value = entry.task;
+          setSelectValues(form.modality, entry.modalities);
+          form.domain.value = entry.domain;
+          form.dataPoints.value = entry.dataPoints ?? "";
+          form.taskCategory.value = entry.taskCategory;
+          form.description.value = entry.description;
+          form.specialty.value = entry.specialty ?? "";
+          form.paperLink.value = entry.paperLink ?? "";
+          form.dataLink.value = entry.dataLink ?? "";
+          form.loadData.value = entry.loadData ?? "";
+          form.dataSize.value = entry.dataSize ?? "";
+          form.queryMod.value = entry.queryMod ?? "";
+          form.targetMod.value = entry.targetMod ?? "";
+          form.numQuery.value = entry.numQuery ?? "";
+          form.numCandidates.value = entry.numCandidates ?? "";
+          form.tags.value = (entry.customTags || []).join(", ");
+          retrievalDetails.open = Boolean(
+            entry.queryMod || entry.targetMod || entry.numQuery || entry.numCandidates
+          );
+          
+          // Clear the clone source so it doesn't persist
+          sessionStorage.removeItem("cloneEntry");
+        } catch (e) {
+          console.error("Failed to load clone source", e);
+        }
+      }
+
+      const setSelectValues = (select, values = []) => {
+        const normalized = normalizeModalities(values);
+        Array.from(select.options).forEach((option) => {
+          option.selected = normalized.includes(option.value);
+        });
+      };
+
+      // --- Auto-fill Logic ---
+      const btnAutofill = document.getElementById("btn-autofill");
+      const inputUrl = document.getElementById("autofill-url");
+      const inputKey = document.getElementById("autofill-key");
+      const statusMsg = document.getElementById("autofill-status");
+
+      btnAutofill.addEventListener("click", async () => {
+        const url = inputUrl.value.trim();
+        const apiKey = inputKey.value.trim();
+
+        if (!url || !apiKey) {
+          statusMsg.textContent = "Please provide both a URL and an OpenAI API Key.";
+          statusMsg.className = "status-msg error";
+          return;
+        }
+
+        statusMsg.textContent = "Fetching page content...";
+        statusMsg.className = "status-msg loading";
+        btnAutofill.disabled = true;
+
+        try {
+          // 1. Fetch page content via a proxy or direct if CORS allows (unlikely for most sites)
+          // Since this is a static site, we can't easily run a server-side scraper.
+          // We'll try to use a CORS proxy for demo purposes, or assume the user provides a raw text/markdown if it fails.
+          // For a robust solution, one would need a backend function (e.g. Netlify Function).
+          // Here we will try to fetch using 'allorigins' proxy to get HTML text.
+          
+          const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
+          const response = await fetch(proxyUrl);
+          const data = await response.json();
+          
+          if (!data.contents) {
+            throw new Error("Failed to retrieve page content.");
+          }
+          
+          // Simple HTML cleanup to reduce token count
+          const parser = new DOMParser();
+          const doc = parser.parseFromString(data.contents, "text/html");
+          // Remove scripts, styles
+          doc.querySelectorAll('script, style, svg, footer, nav').forEach(el => el.remove());
+          const pageText = doc.body.innerText.slice(0, 15000); // Limit context window
+
+          statusMsg.textContent = "Analyzing with GPT-4o...";
+
+          // 2. Call OpenAI API
+          const systemPrompt = `
+You are a helpful assistant that extracts dataset metadata from webpage text.
+Extract the following fields into a JSON object matching this schema:
+{
+  "type": "Evaluation Set" | "Training Set" | "Benchmark" | "Other",
+  "task": "Dataset Name",
+  "modality": ["Text", "Image", "Video", "Audio", "Table", "Thermal", "IMU", "Other"],
+  "domain": "Primary context/domain",
+  "dataPoints": number (total samples),
+  "taskCategory": "e.g. Visual QA",
+  "tags": ["tag1", "tag2"],
+  "dataLink": "URL(s) to data",
+  "loadData": "Instructions or scripts",
+  "dataSize": number (in GB, approximate),
+  "description": "Short description",
+  "specialty": "Nuance or specialty",
+  "paperLink": "URL to paper",
+  "queryMod": "Retrieval query modality",
+  "targetMod": "Retrieval target modality",
+  "numQuery": number,
+  "numCandidates": number
+}
+Return ONLY the JSON object. If a field is not found, use null or empty string.
+`;
+
+          const gptResponse = await fetch("https://api.openai.com/v1/chat/completions", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${apiKey}`
+            },
+            body: JSON.stringify({
+              model: "gpt-4o",
+              messages: [
+                { role: "system", content: systemPrompt },
+                { role: "user", content: `Extract metadata from this text:\n\n${pageText}` }
+              ],
+              response_format: { type: "json_object" }
+            })
+          });
+
+          if (!gptResponse.ok) {
+            const err = await gptResponse.json();
+            throw new Error(err.error?.message || "OpenAI API Error");
+          }
+
+          const gptData = await gptResponse.json();
+          const content = gptData.choices[0].message.content;
+          const result = JSON.parse(content);
+
+          // 3. Fill Form
+          if (result.type) form.type.value = result.type;
+          if (result.task) form.task.value = result.task;
+          if (result.modality) setSelectValues(form.modality, result.modality);
+          if (result.domain) form.domain.value = result.domain;
+          if (result.dataPoints) form.dataPoints.value = result.dataPoints;
+          if (result.taskCategory) form.taskCategory.value = result.taskCategory;
+          if (result.tags) form.tags.value = Array.isArray(result.tags) ? result.tags.join(", ") : result.tags;
+          if (result.dataLink) form.dataLink.value = result.dataLink;
+          if (result.loadData) form.loadData.value = result.loadData;
+          if (result.dataSize) form.dataSize.value = result.dataSize;
+          if (result.description) form.description.value = result.description;
+          if (result.specialty) form.specialty.value = result.specialty;
+          if (result.paperLink) form.paperLink.value = result.paperLink;
+          
+          // Retrieval fields
+          if (result.queryMod) form.queryMod.value = result.queryMod;
+          if (result.targetMod) form.targetMod.value = result.targetMod;
+          if (result.numQuery) form.numQuery.value = result.numQuery;
+          if (result.numCandidates) form.numCandidates.value = result.numCandidates;
+
+          if (result.queryMod || result.targetMod || result.numQuery || result.numCandidates) {
+            retrievalDetails.open = true;
+          }
+
+          statusMsg.textContent = "Form auto-filled successfully!";
+          statusMsg.className = "status-msg success";
+
+        } catch (error) {
+          console.error(error);
+          statusMsg.textContent = `Error: ${error.message}`;
+          statusMsg.className = "status-msg error";
+        } finally {
+          btnAutofill.disabled = false;
+        }
+      });
+
+      form.addEventListener("submit", (event) => {
+        event.preventDefault();
+        const formData = new FormData(form);
+        const customTags = parseTags(formData.get("tags"));
+        const newEntry = {
+          id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()),
+          type: formData.get("type"),
+          task: formData.get("task"),
+          modalities: normalizeModalities(getSelectValues(form.modality)),
+          domain: formData.get("domain"),
+          dataPoints: formData.get("dataPoints") || "",
+          taskCategory: formData.get("taskCategory"),
+          description: formData.get("description"),
+          specialty: formData.get("specialty"),
+          paperLink: formData.get("paperLink"),
+          dataLink: formData.get("dataLink"),
+          loadData: formData.get("loadData"),
+          dataSize: formData.get("dataSize"),
+          queryMod: formData.get("queryMod"),
+          targetMod: formData.get("targetMod"),
+          numQuery: formData.get("numQuery") || "",
+          numCandidates: formData.get("numCandidates") || "",
+          customTags,
+        };
+
+        const currentEntries = getSavedEntries();
+        // If seed entries are not in local storage yet, we might want to handle that, 
+        // but for now we just append to what's there or start fresh.
+        // Ideally we should load seed entries if storage is empty, but since we are on a separate page,
+        // we might not have access to the seed entries definition unless we duplicate it.
+        // For simplicity, we assume the main page has been visited or we just append to whatever is there.
+        
+        const updatedEntries = [newEntry, ...currentEntries];
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedEntries));
+        
+        alert("Dataset added successfully!");
+        window.location.href = "../";
+      });
+    </script>
+  </body>
+</html>
