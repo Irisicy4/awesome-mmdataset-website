@@ -28,7 +28,9 @@ permalinks:
 
 params:
     description: "A curated list of multimodal datasets."
-    author: "Awesome Multimodal Dataset"
+    author:
+        name: "Awesome Multimodal Dataset"
+        email: ""
     mainSections:
         - post
     featuredImageField: image
