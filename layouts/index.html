@@ -72,6 +72,26 @@
         transform: translateY(-2px);
         text-decoration: none;
       }
+      button.add-btn {
+        cursor: pointer;
+        border: none;
+        font: inherit;
+      }
+      .autofill-section {
+        background: #eff6ff;
+        border: 1px solid #bfdbfe;
+        border-radius: 16px;
+        margin-bottom: 1rem;
+      }
+      .autofill-section h2 { margin: 0 0 0.5rem; font-size: 1.15rem; color: #1e40af; }
+      .autofill-section p { color: #1e3a8a; font-size: 0.9rem; margin: 0 0 0.8rem; line-height: 1.5; }
+      .autofill-grid { display: grid; grid-template-columns: 2fr 1fr auto; gap: 0.8rem; align-items: center; }
+      @media (max-width: 600px) { .autofill-grid { grid-template-columns: 1fr; } }
+      .status-msg { margin-top: 0.6rem; font-size: 0.9rem; font-weight: 600; min-height: 1.4em; }
+      .status-msg.error { color: #dc2626; }
+      .status-msg.success { color: #059669; }
+      .status-msg.loading { color: #2563eb; }
+      .add-modal .modal-box { max-width: min(1150px, 96vw); max-height: 92vh; }
 
       .card {
         background: var(--card-accent);
@@ -255,16 +275,104 @@
 
       .table-wrapper {
         margin-top: 0.9rem;
-        border-radius: 24px;
+        border-radius: 16px;
         border: 1px solid var(--border);
         overflow-x: auto;
         background: #fff;
       }
 
-      .dataset-grid {
+      .registry-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.9rem;
+      }
+      .registry-table th,
+      .registry-table td {
+        padding: 0.5rem 0.75rem;
+        text-align: left;
+        border-bottom: 1px solid var(--border);
+      }
+      .registry-table th {
+        font-weight: 600;
+        color: var(--ink-muted);
+        background: var(--card-accent);
+        white-space: nowrap;
+      }
+      .registry-table tbody tr {
+        cursor: pointer;
+        transition: background 0.15s ease;
+      }
+      .registry-table tbody tr:hover {
+        background: var(--accent-soft);
+      }
+      .registry-table .col-name { font-weight: 600; color: var(--ink); min-width: 14rem; width: 28%; }
+      .registry-table .col-type { color: var(--accent); }
+      .registry-table .col-samples { font-variant-numeric: tabular-nums; }
+      .registry-table .col-tags { min-width: 10rem; max-width: 20rem; }
+
+      /* Detail modal */
+      .modal-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.4);
+        z-index: 1000;
+        align-items: center;
+        justify-content: center;
+        padding: 1.5rem;
+        box-sizing: border-box;
+      }
+      .modal-overlay.is-open {
         display: flex;
-        flex-direction: column;
-        gap: 1.5rem;
+      }
+      body.modal-open {
+        overflow: hidden;
+      }
+      .modal-box {
+        background: var(--card);
+        border-radius: 24px;
+        border: 1px solid var(--border);
+        box-shadow: 0 25px 60px rgba(0, 0, 0, 0.2);
+        max-width:  min(1100px, 96vw);
+        width: 100%;
+        max-height: 92vh;
+        overflow: auto;
+        position: relative;
+      }
+      .modal-close {
+        position: sticky;
+        top: 0;
+        right: 0;
+        float: right;
+        margin: 0.75rem 1rem 0 0;
+        width: 2.25rem;
+        height: 2.25rem;
+        min-width: 2.25rem;
+        min-height: 2.25rem;
+        padding: 0;
+        border-radius: 50%;
+        border: 1px solid var(--border);
+        background: #fff;
+        font-size: 1.25rem;
+        line-height: 1;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        z-index: 1;
+        color: var(--ink-muted);
+      }
+      .modal-close:hover {
+        background: var(--card-accent);
+        color: var(--ink);
+      }
+      .modal-body {
+        padding: 1rem 1.5rem 1.5rem;
+        clear: both;
+      }
+
+      .dataset-grid {
+        display: block;
       }
 
       .dataset-card {
@@ -427,9 +535,9 @@
     <main>
       <div class="header-actions">
         <h1>Multimodal Dataset Registry</h1>
-        <a href="add-dataset/" class="add-btn">
+        <button type="button" class="add-btn" id="btn-open-add-modal">
           <span>+</span> Add New Dataset
-        </a>
+        </button>
       </div>
 
       <section class="table-section">
@@ -458,6 +566,90 @@
         </div>
       </section>
     </main>
+    <div id="detail-modal" class="modal-overlay" aria-hidden="true">
+      <div class="modal-box">
+        <button type="button" class="modal-close" id="modal-close-btn" aria-label="Close">×</button>
+        <div class="modal-body" id="modal-body"></div>
+      </div>
+    </div>
+    <div id="add-dataset-modal" class="modal-overlay add-modal" aria-hidden="true">
+      <div class="modal-box">
+        <button type="button" class="modal-close" id="add-modal-close-btn" aria-label="Close">×</button>
+        <div class="modal-body">
+          <h2 style="margin:0 0 1rem">Add New Dataset</h2>
+          <section class="card autofill-section">
+            <h2>🤖 Auto-fill with AI</h2>
+            <p>Paste a dataset URL and your OpenAI API Key to auto-extract metadata.</p>
+            <div class="autofill-grid">
+              <input type="url" id="autofill-url" placeholder="https://huggingface.co/datasets/..." />
+              <input type="password" id="autofill-key" placeholder="sk-..." />
+              <button type="button" id="btn-autofill">Auto-fill</button>
+            </div>
+            <div id="autofill-status" class="status-msg"></div>
+          </section>
+          <form id="add-dataset-form" class="card" style="margin-top:0">
+            <fieldset>
+              <legend>Dataset overview</legend>
+              <div class="field-grid">
+                <label>Type * <span class="helper">Select dataset role</span>
+                  <select name="type" required><option value=""></option><option>Evaluation Set</option><option>Training Set</option><option>Train + Eval</option><option>Benchmark</option><option>Other</option></select>
+                </label>
+                <label>Name * <span class="helper">Dataset or benchmark name</span>
+                  <input type="text" name="task" required />
+                </label>
+                <label>Primary modality * <span class="helper">Hold Cmd/Ctrl to select multiple</span>
+                  <select name="modality" multiple required>
+                    <option value="Text">Text</option><option value="Image">Image</option><option value="Video">Video</option><option value="Audio">Audio</option><option value="Table">Table</option><option value="Thermal">Thermal</option><option value="IMU">IMU</option><option value="Other">Other</option>
+                  </select>
+                </label>
+                <label>Domain * <span class="helper">Primary context</span>
+                  <input type="text" name="domain" required />
+                </label>
+                <label>Data points <span class="helper">Total samples</span>
+                  <input type="number" name="dataPoints" min="0" />
+                </label>
+                <label>Task category * <span class="helper">e.g., Visual QA</span>
+                  <input type="text" name="taskCategory" required />
+                </label>
+                <label>Tags <span class="helper">Comma-separated optional labels</span>
+                  <input type="text" name="tags" placeholder="mRAG, cooking" />
+                </label>
+              </div>
+            </fieldset>
+            <fieldset>
+              <legend>Download &amp; Logistics</legend>
+              <div class="field-grid">
+                <label>Data link(s) * <span class="helper">URLs or repo paths, comma-separated</span>
+                  <textarea name="dataLink" required></textarea>
+                </label>
+                <label>Load / download instructions <span class="helper">Script fragments or notes</span>
+                  <textarea name="loadData"></textarea>
+                </label>
+                <label>Data size (GB) <span class="helper">Approximate</span>
+                  <input type="number" name="dataSize" step="0.1" min="0" />
+                </label>
+              </div>
+            </fieldset>
+            <label>Description * <textarea name="description" required></textarea></label>
+            <label>Specialty / nuance <textarea name="specialty"></textarea></label>
+            <label>Paper link <input type="text" name="paperLink" /></label>
+            <details class="retrieval" id="add-form-retrieval-details">
+              <summary>Retrieval-specific metadata (optional)</summary>
+              <div class="field-grid">
+                <label>Query modality <input type="text" name="queryMod" /></label>
+                <label>Target modality <input type="text" name="targetMod" /></label>
+                <label>Number of queries <input type="number" name="numQuery" min="0" /></label>
+                <label>Number of candidates <input type="number" name="numCandidates" min="0" /></label>
+              </div>
+            </details>
+            <div class="actions">
+              <button type="reset" class="secondary">Reset</button>
+              <button type="submit">Add dataset entry</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
 
     <script src="{{ "js/firebase-config.js" | relURL }}"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
@@ -524,6 +716,16 @@
 
       const formatModalities = (modalities = []) =>
         modalities.length ? modalities.join(" + ") : "—";
+
+      const formatTypeShort = (type) => {
+        if (!type) return "—";
+        const t = String(type).toLowerCase();
+        if (/train\s*\+\s*eval/.test(t)) return "Train + Eval";
+        if (t.includes("train")) return "Train";
+        if (t.includes("eval")) return "Eval";
+        if (t.includes("bench")) return "Bench";
+        return type;
+      };
 
       const getSelectValues = (select) =>
         Array.from(select.selectedOptions || []).map((option) => option.value);
@@ -1026,12 +1228,231 @@
       };
 
       const renderTable = () => {
-        gridContainer.replaceChildren(
-          ...getFilteredEntries().map((entry) => createCard(entry))
-        );
+        const entries = getFilteredEntries();
+        const table = document.createElement("table");
+        table.className = "registry-table";
+        table.innerHTML = `
+          <thead><tr>
+            <th>Name</th><th>Type</th><th>Domain</th><th>Modalities</th><th>Samples</th><th>Tags</th>
+          </tr></thead>
+          <tbody></tbody>
+        `;
+        const tbody = table.querySelector("tbody");
+        entries.forEach((entry) => {
+          const tr = document.createElement("tr");
+          tr.dataset.entryId = entry.id;
+          tr.innerHTML = `
+            <td class="col-name">${escapeHtml(entry.task)}</td>
+            <td class="col-type">${escapeHtml(formatTypeShort(entry.type))}</td>
+            <td>${escapeHtml(entry.domain)}</td>
+            <td>${escapeHtml(formatModalities(entry.modalities))}</td>
+            <td class="col-samples">${formatNumber(entry.dataPoints)}</td>
+            <td class="col-tags">${escapeHtml(combineTags(entry).join(", "))}</td>
+          `;
+          tr.addEventListener("click", () => openDetailModal(entry));
+          tbody.appendChild(tr);
+        });
+        gridContainer.replaceChildren(table);
       };
 
-      const createCard = (entry) => {
+      const escapeHtml = (str) => {
+        if (str == null) return "—";
+        const div = document.createElement("div");
+        div.textContent = str;
+        return div.innerHTML;
+      };
+
+      const detailModalEl = document.getElementById("detail-modal");
+      const modalBodyEl = document.getElementById("modal-body");
+      const modalCloseBtn = document.getElementById("modal-close-btn");
+
+      const openDetailModal = (entry) => {
+        modalBodyEl.replaceChildren(createCard(entry, true));
+        detailModalEl.classList.add("is-open");
+        detailModalEl.setAttribute("aria-hidden", "false");
+        document.body.classList.add("modal-open");
+      };
+
+      const closeDetailModal = () => {
+        detailModalEl.classList.remove("is-open");
+        detailModalEl.setAttribute("aria-hidden", "true");
+        document.body.classList.remove("modal-open");
+        modalBodyEl.replaceChildren();
+      };
+
+      modalCloseBtn.addEventListener("click", closeDetailModal);
+      detailModalEl.addEventListener("click", (e) => {
+        if (e.target === detailModalEl) closeDetailModal();
+      });
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape" && detailModalEl.classList.contains("is-open"))
+          closeDetailModal();
+      });
+
+      const addModalEl = document.getElementById("add-dataset-modal");
+      const addModalCloseBtn = document.getElementById("add-modal-close-btn");
+      const addForm = document.getElementById("add-dataset-form");
+      const addFormRetrievalDetails = document.getElementById("add-form-retrieval-details");
+
+      const openAddModal = () => {
+        addModalEl.classList.add("is-open");
+        addModalEl.setAttribute("aria-hidden", "false");
+        document.body.classList.add("modal-open");
+        const cloneSource = sessionStorage.getItem("cloneEntry");
+        if (cloneSource) {
+          try {
+            const entry = JSON.parse(cloneSource);
+            addForm.type.value = entry.type || "";
+            addForm.task.value = entry.task || "";
+            setSelectValues(addForm.modality, entry.modalities);
+            addForm.domain.value = entry.domain || "";
+            addForm.dataPoints.value = entry.dataPoints ?? "";
+            addForm.taskCategory.value = entry.taskCategory || "";
+            addForm.description.value = entry.description || "";
+            addForm.specialty.value = entry.specialty ?? "";
+            addForm.paperLink.value = entry.paperLink ?? "";
+            addForm.dataLink.value = entry.dataLink ?? "";
+            addForm.loadData.value = entry.loadData ?? "";
+            addForm.dataSize.value = entry.dataSize ?? "";
+            addForm.queryMod.value = entry.queryMod ?? "";
+            addForm.targetMod.value = entry.targetMod ?? "";
+            addForm.numQuery.value = entry.numQuery ?? "";
+            addForm.numCandidates.value = entry.numCandidates ?? "";
+            addForm.tags.value = (entry.customTags || []).join(", ");
+            addFormRetrievalDetails.open = Boolean(entry.queryMod || entry.targetMod || entry.numQuery || entry.numCandidates);
+            sessionStorage.removeItem("cloneEntry");
+          } catch (e) { console.error("Failed to load clone source", e); }
+        }
+      };
+
+      const closeAddModal = () => {
+        addModalEl.classList.remove("is-open");
+        addModalEl.setAttribute("aria-hidden", "true");
+        document.body.classList.remove("modal-open");
+      };
+
+      document.getElementById("btn-open-add-modal").addEventListener("click", openAddModal);
+      addModalCloseBtn.addEventListener("click", closeAddModal);
+
+      addForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const formData = new FormData(addForm);
+        const customTags = parseTags(formData.get("tags"));
+        const newEntry = {
+          id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()),
+          type: formData.get("type"),
+          task: formData.get("task"),
+          modalities: normalizeModalities(getSelectValues(addForm.modality)),
+          domain: formData.get("domain"),
+          dataPoints: formData.get("dataPoints") || "",
+          taskCategory: formData.get("taskCategory"),
+          description: formData.get("description"),
+          specialty: formData.get("specialty"),
+          paperLink: formData.get("paperLink"),
+          dataLink: formData.get("dataLink"),
+          loadData: formData.get("loadData"),
+          dataSize: formData.get("dataSize"),
+          queryMod: formData.get("queryMod"),
+          targetMod: formData.get("targetMod"),
+          numQuery: formData.get("numQuery") || "",
+          numCandidates: formData.get("numCandidates") || "",
+          customTags,
+        };
+        const submitBtn = addForm.querySelector('button[type="submit"]');
+        const origText = submitBtn.textContent;
+        submitBtn.disabled = true;
+        submitBtn.textContent = "Saving…";
+        try {
+          datasetEntries = [newEntry, ...datasetEntries];
+          await persistEntries();
+          closeAddModal();
+          renderTable();
+          addForm.reset();
+          alert("Dataset added successfully!");
+        } catch (err) {
+          console.error(err);
+          alert("Failed to save: " + (err.message || "Unknown error"));
+        } finally {
+          submitBtn.disabled = false;
+          submitBtn.textContent = origText;
+        }
+      });
+
+      const btnAutofill = document.getElementById("btn-autofill");
+      const inputUrl = document.getElementById("autofill-url");
+      const inputKey = document.getElementById("autofill-key");
+      const statusMsg = document.getElementById("autofill-status");
+      btnAutofill.addEventListener("click", async () => {
+        const url = inputUrl.value.trim();
+        const apiKey = inputKey.value.trim();
+        if (!url || !apiKey) {
+          statusMsg.textContent = "Please provide both a URL and an OpenAI API Key.";
+          statusMsg.className = "status-msg error";
+          return;
+        }
+        statusMsg.textContent = "Fetching page content...";
+        statusMsg.className = "status-msg loading";
+        btnAutofill.disabled = true;
+        try {
+          const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
+          const response = await fetch(proxyUrl);
+          const data = await response.json();
+          if (!data.contents) throw new Error("Failed to retrieve page content.");
+          const parser = new DOMParser();
+          const doc = parser.parseFromString(data.contents, "text/html");
+          doc.querySelectorAll("script, style, svg, footer, nav").forEach((el) => el.remove());
+          const pageText = doc.body.innerText.slice(0, 15000);
+          statusMsg.textContent = "Analyzing with GPT-4o...";
+          const systemPrompt = `You are a helpful assistant that extracts dataset metadata from webpage text. Extract the following fields into a JSON object: type (Evaluation Set|Training Set|Benchmark|Other), task, modality (array), domain, dataPoints, taskCategory, tags (array), dataLink, loadData, dataSize, description, specialty, paperLink, queryMod, targetMod, numQuery, numCandidates. Return ONLY the JSON object.`;
+          const gptResponse = await fetch("https://api.openai.com/v1/chat/completions", {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "Authorization": `Bearer ${apiKey}` },
+            body: JSON.stringify({
+              model: "gpt-4o",
+              messages: [
+                { role: "system", content: systemPrompt },
+                { role: "user", content: `Extract metadata from this text:\n\n${pageText}` }
+              ],
+              response_format: { type: "json_object" }
+            })
+          });
+          if (!gptResponse.ok) {
+            const err = await gptResponse.json();
+            throw new Error(err.error?.message || "OpenAI API Error");
+          }
+          const gptData = await gptResponse.json();
+          const result = JSON.parse(gptData.choices[0].message.content);
+          if (result.type) addForm.type.value = result.type;
+          if (result.task) addForm.task.value = result.task;
+          if (result.modality) setSelectValues(addForm.modality, result.modality);
+          if (result.domain) addForm.domain.value = result.domain;
+          if (result.dataPoints) addForm.dataPoints.value = result.dataPoints;
+          if (result.taskCategory) addForm.taskCategory.value = result.taskCategory;
+          if (result.tags) addForm.tags.value = Array.isArray(result.tags) ? result.tags.join(", ") : result.tags;
+          if (result.dataLink) addForm.dataLink.value = result.dataLink;
+          if (result.loadData) addForm.loadData.value = result.loadData;
+          if (result.dataSize) addForm.dataSize.value = result.dataSize;
+          if (result.description) addForm.description.value = result.description;
+          if (result.specialty) addForm.specialty.value = result.specialty;
+          if (result.paperLink) addForm.paperLink.value = result.paperLink;
+          if (result.queryMod) addForm.queryMod.value = result.queryMod;
+          if (result.targetMod) addForm.targetMod.value = result.targetMod;
+          if (result.numQuery) addForm.numQuery.value = result.numQuery;
+          if (result.numCandidates) addForm.numCandidates.value = result.numCandidates;
+          if (result.queryMod || result.targetMod || result.numQuery || result.numCandidates)
+            addFormRetrievalDetails.open = true;
+          statusMsg.textContent = "Form auto-filled successfully!";
+          statusMsg.className = "status-msg success";
+        } catch (error) {
+          console.error(error);
+          statusMsg.textContent = `Error: ${error.message}`;
+          statusMsg.className = "status-msg error";
+        } finally {
+          btnAutofill.disabled = false;
+        }
+      });
+
+      const createCard = (entry, inModal = false) => {
         const card = document.createElement("div");
         card.className = "dataset-card";
 
@@ -1059,19 +1480,25 @@
         editTagsBtn.type = "button";
         editTagsBtn.className = "secondary";
         editTagsBtn.textContent = "Edit Tags";
-        editTagsBtn.addEventListener("click", () => editTags(entry.id));
+        editTagsBtn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          editTags(entry.id, inModal ? closeDetailModal : null);
+        });
 
         const cloneBtn = document.createElement("button");
         cloneBtn.type = "button";
         cloneBtn.className = "secondary";
         cloneBtn.textContent = "Clone";
-        cloneBtn.addEventListener("click", () => cloneEntry(entry.id));
+        cloneBtn.addEventListener("click", (e) => { e.stopPropagation(); cloneEntry(entry.id); });
 
         const deleteBtn = document.createElement("button");
         deleteBtn.type = "button";
         deleteBtn.className = "danger";
         deleteBtn.textContent = "Delete";
-        deleteBtn.addEventListener("click", () => deleteEntry(entry.id));
+        deleteBtn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          deleteEntry(entry.id, inModal ? closeDetailModal : null);
+        });
 
         actions.append(editTagsBtn, cloneBtn, deleteBtn);
         header.appendChild(actions);
@@ -1089,7 +1516,7 @@
           tagsRow.appendChild(pill);
         };
 
-        addPill(entry.type, true);
+        addPill(formatTypeShort(entry.type), true);
         addPill(entry.domain);
         addPill(formatModalities(entry.modalities));
         addPill(entry.taskCategory);
@@ -1175,23 +1602,15 @@
         return card;
       };
 
-      const createCell = (value, className) => {
-        const cell = document.createElement("td");
-        if (className) cell.classList.add(className);
-        cell.textContent = value || "—";
-        return cell;
-      };
-
       const cloneEntry = (id) => {
         const entry = datasetEntries.find((item) => item.id === id);
         if (!entry) return;
-        
-        // Store entry in session storage to be picked up by the add-dataset page
         sessionStorage.setItem("cloneEntry", JSON.stringify(entry));
-        window.location.href = "add-dataset/";
+        closeDetailModal();
+        openAddModal();
       };
 
-      const editTags = (id) => {
+      const editTags = (id, onDone) => {
         const entry = datasetEntries.find((item) => item.id === id);
         if (!entry) return;
 
@@ -1205,10 +1624,11 @@
         if (next === null) return;
 
         entry.customTags = parseTags(next);
+        if (typeof onDone === "function") onDone();
         persistEntries().then(renderTable);
       };
 
-      const deleteEntry = (id) => {
+      const deleteEntry = (id, onDone) => {
         const attempt = window.prompt("Enter password to delete this entry:");
         if (attempt !== "notawesome") {
           if (attempt !== null) {
@@ -1217,6 +1637,7 @@
           return;
         }
         datasetEntries = datasetEntries.filter((entry) => entry.id !== id);
+        if (typeof onDone === "function") onDone();
         persistEntries().then(renderTable);
       };
     </script>
