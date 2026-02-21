@@ -364,8 +364,27 @@
       </section>
     </main>
 
+    <script src="{{ "js/firebase-config.js" | relURL }}"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
     <script>
+      const FIREBASE_CONFIG = window.FIREBASE_CONFIG || {
+        apiKey: "YOUR_API_KEY",
+        authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+        projectId: "YOUR_PROJECT_ID",
+        storageBucket: "YOUR_PROJECT_ID.appspot.com",
+        messagingSenderId: "YOUR_SENDER_ID",
+        appId: "YOUR_APP_ID",
+      };
+      const FIRESTORE_DOC = "registry/entries";
       const STORAGE_KEY = "mmDatasetEntries-v3";
+      let firestoreDb = null;
+      try {
+        firebase.initializeApp(FIREBASE_CONFIG);
+        firestoreDb = firebase.firestore();
+      } catch (e) {
+        console.warn("Firebase init failed; using localStorage.", e);
+      }
       const form = document.getElementById("dataset-form");
       const retrievalDetails = document.getElementById("retrieval-details");
       const MODALITY_OPTIONS = ["Text", "Image", "Video", "Audio", "Table", "Thermal", "IMU", "Other"];
@@ -410,19 +429,29 @@
           .map((tag) => tag.trim())
           .filter(Boolean);
 
-      const getSavedEntries = () => {
+      const getSavedEntriesFromStorage = () => {
         try {
           const saved = localStorage.getItem(STORAGE_KEY);
           if (saved) return JSON.parse(saved);
-          const legacyKeys = ["mmDatasetEntries-v2", "mmDatasetEntries-v1"];
-          for (const key of legacyKeys) {
+          for (const key of ["mmDatasetEntries-v2", "mmDatasetEntries-v1"]) {
             const legacy = localStorage.getItem(key);
             if (legacy) return JSON.parse(legacy);
           }
-        } catch (error) {
-          console.warn("Unable to parse saved entries", error);
-        }
+        } catch (e) { console.warn("Unable to parse saved entries", e); }
         return [];
+      };
+
+      const getSavedEntries = async () => {
+        if (firestoreDb) {
+          try {
+            const snap = await firestoreDb.doc(FIRESTORE_DOC).get();
+            if (snap.exists && snap.data().list && Array.isArray(snap.data().list))
+              return snap.data().list;
+          } catch (e) {
+            console.warn("Firestore get failed; using localStorage", e);
+          }
+        }
+        return getSavedEntriesFromStorage();
       };
 
       // Check for clone data
@@ -597,7 +626,7 @@ Return ONLY the JSON object. If a field is not found, use null or empty string.
         }
       });
 
-      form.addEventListener("submit", (event) => {
+      form.addEventListener("submit", async (event) => {
         event.preventDefault();
         const formData = new FormData(form);
         const customTags = parseTags(formData.get("tags"));
@@ -622,18 +651,25 @@ Return ONLY the JSON object. If a field is not found, use null or empty string.
           customTags,
         };
 
-        const currentEntries = getSavedEntries();
-        // If seed entries are not in local storage yet, we might want to handle that, 
-        // but for now we just append to what's there or start fresh.
-        // Ideally we should load seed entries if storage is empty, but since we are on a separate page,
-        // we might not have access to the seed entries definition unless we duplicate it.
-        // For simplicity, we assume the main page has been visited or we just append to whatever is there.
-        
-        const updatedEntries = [newEntry, ...currentEntries];
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedEntries));
-        
-        alert("Dataset added successfully!");
-        window.location.href = "../";
+        const submitBtn = form.querySelector('button[type="submit"]');
+        const origText = submitBtn.textContent;
+        submitBtn.disabled = true;
+        submitBtn.textContent = "Saving…";
+        try {
+          const currentEntries = await getSavedEntries();
+          const updatedEntries = [newEntry, ...currentEntries];
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedEntries));
+          if (firestoreDb) {
+            await firestoreDb.doc(FIRESTORE_DOC).set({ list: updatedEntries });
+          }
+          alert("Dataset added successfully!");
+          window.location.href = "../";
+        } catch (e) {
+          console.error(e);
+          alert("Failed to save: " + (e.message || "Unknown error"));
+          submitBtn.disabled = false;
+          submitBtn.textContent = origText;
+        }
       });
     </script>
   </body>

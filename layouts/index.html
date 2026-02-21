@@ -454,13 +454,32 @@
           </div>
         </div>
         <div class="table-wrapper">
-          <div id="dataset-grid" class="dataset-grid"></div>
+          <div id="dataset-grid" class="dataset-grid"><p class="muted" id="loading-msg">Loading registry…</p></div>
         </div>
       </section>
     </main>
 
+    <script src="{{ "js/firebase-config.js" | relURL }}"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
     <script>
-      const STORAGE_KEY = "mmDatasetEntries-v3";
+      // Replace with your Firebase project config from Firebase Console → Project settings
+      const FIREBASE_CONFIG = window.FIREBASE_CONFIG || {
+        apiKey: "YOUR_API_KEY",
+        authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+        projectId: "YOUR_PROJECT_ID",
+        storageBucket: "YOUR_PROJECT_ID.appspot.com",
+        messagingSenderId: "YOUR_SENDER_ID",
+        appId: "YOUR_APP_ID",
+      };
+      const FIRESTORE_DOC = "registry/entries";
+      let firestoreDb = null;
+      try {
+        firebase.initializeApp(FIREBASE_CONFIG);
+        firestoreDb = firebase.firestore();
+      } catch (e) {
+        console.warn("Firebase init failed; using localStorage fallback.", e);
+      }
 
       const gridContainer = document.getElementById("dataset-grid");
       const filterControls = {
@@ -779,28 +798,35 @@
         return Array.from(new Set([...deriveAutoTags(entry), ...(entry.customTags || [])]));
       };
 
-      const getSavedEntries = () => {
+      const STORAGE_KEY = "mmDatasetEntries-v3";
+
+      const getSavedEntriesFromStorage = () => {
         try {
           const saved = localStorage.getItem(STORAGE_KEY);
           if (saved) return JSON.parse(saved);
-          const legacyKeys = ["mmDatasetEntries-v2", "mmDatasetEntries-v1"];
-          for (const key of legacyKeys) {
+          for (const key of ["mmDatasetEntries-v2", "mmDatasetEntries-v1"]) {
             const legacy = localStorage.getItem(key);
             if (legacy) return JSON.parse(legacy);
           }
-        } catch (error) {
-          console.warn("Unable to parse saved entries", error);
-        }
+        } catch (e) { console.warn("Unable to parse saved entries", e); }
         return null;
       };
 
-      let datasetEntries = (getSavedEntries() ?? seedEntries).map((entry) => ({
-        ...entry,
-        modalities: normalizeModalities(entry.modalities ?? entry.modality),
-        customTags: Array.isArray(entry.customTags)
-          ? entry.customTags
-          : parseTags(entry.customTags || ""),
-      }));
+      const getSavedEntries = async () => {
+        if (firestoreDb) {
+          try {
+            const ref = firestoreDb.doc(FIRESTORE_DOC);
+            const snap = await ref.get();
+            if (snap.exists && snap.data().list && Array.isArray(snap.data().list))
+              return snap.data().list;
+          } catch (e) {
+            console.warn("Firestore get failed; falling back to localStorage", e);
+          }
+        }
+        return getSavedEntriesFromStorage();
+      };
+
+      let datasetEntries = [];
 
       const uniqueValues = (values) =>
         [...new Set(values.filter((value) => value && value.trim()))].sort((a, b) =>
@@ -842,12 +868,39 @@
         );
       };
 
-      const persistEntries = () => {
+      const persistEntries = async () => {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(datasetEntries));
+        if (firestoreDb) {
+          try {
+            await firestoreDb.doc(FIRESTORE_DOC).set({ list: datasetEntries });
+          } catch (e) {
+            console.warn("Firestore write failed", e);
+          }
+        }
         populateFilterOptions();
       };
 
-      persistEntries();
+      const normalizeEntry = (entry) => ({
+        ...entry,
+        modalities: normalizeModalities(entry.modalities ?? entry.modality),
+        customTags: Array.isArray(entry.customTags)
+          ? entry.customTags
+          : parseTags(entry.customTags || ""),
+      });
+
+      (async function init() {
+        const loadingMsg = document.getElementById("loading-msg");
+        let saved = await getSavedEntries();
+        if (saved && saved.length > 0) {
+          datasetEntries = saved.map(normalizeEntry);
+        } else {
+          datasetEntries = seedEntries.map(normalizeEntry);
+          await persistEntries();
+        }
+        if (loadingMsg) loadingMsg.remove();
+        populateFilterOptions();
+        renderTable();
+      })();
 
       ["type", "domain", "tag"].forEach((key) => {
         filterControls[key].addEventListener("change", (event) => {
@@ -1152,8 +1205,7 @@
         if (next === null) return;
 
         entry.customTags = parseTags(next);
-        persistEntries();
-        renderTable();
+        persistEntries().then(renderTable);
       };
 
       const deleteEntry = (id) => {
@@ -1165,11 +1217,8 @@
           return;
         }
         datasetEntries = datasetEntries.filter((entry) => entry.id !== id);
-        persistEntries();
-        renderTable();
+        persistEntries().then(renderTable);
       };
-
-      renderTable();
     </script>
   </body>
 </html>

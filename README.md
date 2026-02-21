@@ -3,10 +3,14 @@
 This repository hosts a lightweight Hugo site whose single page (`layouts/index.html`) powers an interactive registry for multimodal datasets. The page provides:
 
 - A structured intake form with required fields (type, task, modality, domain, task category, description, download links) plus retrieval-specific metadata in a collapsible section.
-- A table that keeps browser-local records, supports cloning and password-gated deletion, and renders download/logistics links with rich formatting.
+- A table that keeps **shared, persistent** records in Firebase Firestore (or falls back to browser localStorage if Firebase is not configured), supports cloning and password-gated deletion, and renders download/logistics links with rich formatting.
 - Smart tagging (auto-generating tags from modality/domain/RAG info, with manual overrides) along with dropdown and text search filters for quick triage.
 
 Legacy “personal website” content, sections, and styling assets have been removed so the repo contains only what is needed to deploy the dataset registry.
+
+## Persistent storage (Firebase Firestore)
+
+The registry uses **Firebase Firestore** so that all users see the same data and changes persist across devices. The site still works without Firebase (data stays in the browser’s localStorage).
 
 ## Local Development
 
@@ -27,6 +31,6 @@ To ship a production build run `hugo`, then publish the generated `public/` dire
 
 ## Notes
 
-- Entries live in `localStorage` in the user’s browser (`mmDatasetEntries-v3`); removing that key resets the registry.
+- **With Firebase configured:** entries live in Firestore (`registry/entries`), shared for all users. **Without Firebase:** entries fall back to `localStorage` (`mmDatasetEntries-v3`) in the browser.
 - Deleting a row in the UI requires entering the password `notawesome` to avoid accidental removals.
-- If you need to seed different default datasets, edit the `seedEntries` array near the bottom of `layouts/index.html`.
+- If you need to seed different default datasets, edit the `seedEntries` array in `layouts/index.html`. The first load with an empty Firestore will seed the database with `seedEntries`.
